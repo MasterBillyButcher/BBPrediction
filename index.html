@@ -7,21 +7,35 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="center-screen">
-    <h1>Bigg Boss 19 Prediction Game</h1>
-    <p>Login with Twitch to predict outcomes and climb the leaderboard!</p>
-    <button id="twitchLoginBtn">Login with Twitch</button>
-  </div>
+<div class="center-screen">
+<h1>Bigg Boss 19 Prediction Game</h1>
+<p>Login with Twitch to start predicting!</p>
+<button id="loginBtn">Login with Twitch</button>
+</div>
 
 <script>
 const clientId = "wtecr95tk5eu66xeugoiph13ba69m9";
-const redirectUri = "http://localhost:5500/callback.html"; // Change when deploying
-const scope = "user:read:email";
+const redirectUri = "https://bb-prediction.vercel.app/";
 
-document.getElementById("twitchLoginBtn").addEventListener("click", () => {
-    const twitchLoginUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}`;
-    window.location.href = twitchLoginUrl;
-});
+document.getElementById("loginBtn").onclick = () => {
+    window.location = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user:read:email`;
+}
+
+// Save token from URL hash
+window.onload = () => {
+    if(window.location.hash){
+        const hash = window.location.hash.substring(1).split('&').reduce((res, item)=>{
+            const parts = item.split('=');
+            res[parts[0]] = parts[1];
+            return res;
+        },{});
+        if(hash.access_token){
+            localStorage.setItem("twitchToken", hash.access_token);
+            alert("Logged in successfully!");
+            window.location = "predict.html";
+        }
+    }
+}
 </script>
 </body>
 </html>

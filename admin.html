@@ -9,91 +9,61 @@
 <body>
 <div class="center-screen">
 <h1>Admin Panel ⚙️</h1>
-<p>Pick nominations, set end time, and publish round</p>
+<p id="welcome"></p>
+<div id="adminActions" style="display:none;">
+<h3>Select Nominated Contestants</h3>
+<select id="nominations" multiple>
+  <!-- Will populate dynamically -->
+</select>
+<button onclick="publishNominations()">Publish Nominations</button>
 
-<select id="nominees" multiple size="8" style="width:220px;">
-<!-- Filled dynamically -->
+<h3>Set Prediction Result</h3>
+<select id="setResult">
+  <!-- Will populate dynamically -->
 </select>
-<br>
-<input type="datetime-local" id="endTime">
-<br>
-<button id="publishRound">Publish Round</button>
-
-<h2>Set Result for Previous Rounds</h2>
-<select id="roundSelect">
-<option value="">Select Round</option>
-</select>
-<select id="resultSelect">
-<!-- nominees filled dynamically -->
-</select>
-<br>
-<button id="setResult">Set Result</button>
+<button onclick="setResultFunc()">Set Result</button>
+</div>
 </div>
 
 <script>
-const twitchUser = localStorage.getItem("twitchUsername");
-const adminUsername = "YOUR_TWITCH_USERNAME"; // replace
-
-if(twitchUser !== adminUsername){
-    alert("Access Denied: Only Admin can access this page.");
-    window.location.href="index.html";
-}
+// Admin usernames (add new admins by editing this array)
+let admins = ["bobmasterbillie"];
 
 const allContestants = ["Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri","Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik","Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma","Mridul Tiwari","Shehbaz Badesha"];
-const nomineesEl=document.getElementById("nominees");
-allContestants.forEach(c=>{
-    const opt=document.createElement("option");
-    opt.value=opt.textContent=c;
-    nomineesEl.appendChild(opt);
-});
 
-let rounds = JSON.parse(localStorage.getItem("rounds")) || [];
-const roundSelect = document.getElementById("roundSelect");
-const resultSelect = document.getElementById("resultSelect");
+// Replace this with Twitch username from token in production
+const twitchUsername = prompt("Enter your Twitch username for testing"); 
+document.getElementById("welcome").innerText = `Welcome ${twitchUsername}`;
 
-function refreshRounds(){
-    roundSelect.innerHTML="<option value=''>Select Round</option>";
-    rounds.forEach(r=>{
-        const opt=document.createElement("option");
-        opt.value=r.roundId;
-        opt.textContent=`Round ${r.roundId}`;
-        roundSelect.appendChild(opt);
+if(admins.includes(twitchUsername)){
+    document.getElementById("adminActions").style.display="block";
+    const sel1 = document.getElementById("nominations");
+    allContestants.forEach(name=>{
+        const opt = document.createElement("option");
+        opt.textContent = name;
+        sel1.appendChild(opt);
     });
+    const sel2 = document.getElementById("setResult");
+    allContestants.concat(["No Elimination","Double Elimination"]).forEach(name=>{
+        const opt = document.createElement("option");
+        opt.textContent = name;
+        sel2.appendChild(opt);
+    });
+}else{
+    alert("You are not an admin!");
 }
 
-roundSelect.onchange = ()=>{
-    const selectedId = parseInt(roundSelect.value);
-    const round = rounds.find(r=>r.roundId===selectedId);
-    resultSelect.innerHTML="";
-    if(round) round.nominations.forEach(n=>{
-        const opt=document.createElement("option");
-        opt.value=opt.textContent=n;
-        resultSelect.appendChild(opt);
-    });
-};
+function publishNominations(){
+    const selected = Array.from(document.getElementById("nominations").selectedOptions).map(o=>o.value);
+    localStorage.setItem("currentNominations", JSON.stringify(selected));
+    alert("Nominations published: " + selected.join(", "));
+}
 
-document.getElementById("publishRound").onclick = ()=>{
-    const selectedNominees = Array.from(nomineesEl.selectedOptions).map(o=>o.value);
-    const endTime = document.getElementById("endTime").value;
-    if(selectedNominees.length===0 || !endTime) return alert("Select nominations & end time");
-    const roundId = rounds.length+1;
-    rounds.push({roundId, nominations:selectedNominees, endTime, predictions:{}, result:null});
-    localStorage.setItem("rounds",JSON.stringify(rounds));
-    alert("Round published!");
-    refreshRounds();
-};
-
-document.getElementById("setResult").onclick = ()=>{
-    const selectedId=parseInt(roundSelect.value);
-    const result = resultSelect.value;
-    if(!selectedId || !result) return alert("Select round & result");
-    const round = rounds.find(r=>r.roundId===selectedId);
-    round.result=result;
-    localStorage.setItem("rounds",JSON.stringify(rounds));
-    alert(`Result for Round ${selectedId} set: ${result}`);
-};
-
-refreshRounds();
+function setResultFunc(){
+    const res = document.getElementById("setResult").value;
+    localStorage.setItem("currentResult", res);
+    alert("Result set: "+res);
+}
 </script>
 </body>
 </html>

@@ -7,30 +7,29 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1 style="text-align:center;">Leaderboard 🏆</h1>
 <div class="center-screen">
-<table border="1" style="color:#39FF14; border-collapse:collapse;">
-<thead>
-<tr><th>Rank</th><th>Username</th><th>Points</th></tr>
-</thead>
-<tbody id="leaderboardBody"></tbody>
+<h1>Leaderboard 🏆</h1>
+<table id="leaderboardTable">
+<tr><th>Rank</th><th>User</th><th>Points</th></tr>
 </table>
 </div>
+
 <script>
-let rounds=JSON.parse(localStorage.getItem("rounds"))||[];
-let scores={};
-rounds.forEach(r=>{
-    if(!r.result) return;
-    for(const [user,pred] of Object.entries(r.predictions||{})){
-        if(pred===r.result) scores[user]=(scores[user]||0)+1;
-    }
-});
-const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
-const tbody=document.getElementById("leaderboardBody");
-sorted.forEach(([user,pts],i)=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${i+1}</td><td>${user}</td><td>${pts}</td>`;
-    tbody.appendChild(tr);
+const votes = JSON.parse(localStorage.getItem("votes") || "{}");
+const result = localStorage.getItem("currentResult") || null;
+
+let scores = {};
+for(let user in votes){
+    if(!scores[user]) scores[user]=0;
+    if(votes[user]===result) scores[user]+=1;
+}
+
+let sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+const table = document.getElementById("leaderboardTable");
+sorted.forEach(([user,points],idx)=>{
+    let tr = document.createElement("tr");
+    tr.innerHTML=`<td>${idx+1}</td><td>${user}</td><td>${points}</td>`;
+    table.appendChild(tr);
 });
 </script>
 </body>

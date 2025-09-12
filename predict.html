@@ -3,132 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prediction Page</title>
+<title>Predict</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="center-screen">
-<h1>Current Prediction 🔮</h1>
-<div id="countdown"></div>
-
-<div class="card-container" id="predictionCards">
-  <!-- Contestant cards & No/Double elimination will be injected here -->
-</div>
-
-<button id="submitPrediction">Submit Prediction</button>
-
-<h2>Previous Predictions</h2>
-<div id="pastRounds"></div>
+<h1>Make Your Prediction 🔮</h1>
+<p id="countdown"></p>
+<div id="predictionContainer"></div>
+<button id="submitBtn">Submit Prediction</button>
 </div>
 
 <script>
-const twitchUser = localStorage.getItem("twitchUsername") || "Guest";
+let nominations = JSON.parse(localStorage.getItem("currentNominations")) || [];
+const result = localStorage.getItem("currentResult") || null;
+const predictionContainer = document.getElementById("predictionContainer");
 
-// Sample contestants
-const allContestants = ["Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri","Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik","Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma","Mridul Tiwari","Shehbaz Badesha"];
-
-// Load rounds from localStorage
-let rounds = JSON.parse(localStorage.getItem("rounds")) || [];
-
-// Get current round (last one)
-let currentRound = rounds.length ? rounds[rounds.length-1] : null;
-
-// Countdown
-function startCountdown(endTime){
-    const countdownEl = document.getElementById("countdown");
-    const interval = setInterval(()=>{
-        const now = new Date();
-        const distance = new Date(endTime) - now;
-        if(distance<0){
-            clearInterval(interval);
-            countdownEl.innerHTML = "Voting ended!";
-            disableVoting();
-            return;
-        }
-        const hours = Math.floor(distance/(1000*60*60));
-        const minutes = Math.floor((distance%(1000*60*60))/(1000*60));
-        const seconds = Math.floor((distance%(1000*60))/1000);
-        countdownEl.innerHTML = `Time left: ${hours}h ${minutes}m ${seconds}s`;
-    },1000);
-}
-
-// Render cards
-function renderCards(round){
-    const container = document.getElementById("predictionCards");
-    container.innerHTML = "";
-    if(!round) return;
-    round.nominations.forEach(name=>{
-        const card = document.createElement("div");
-        card.className="card";
-        card.innerHTML = `<img src="Contestent/${name}.jpg" alt="${name}"><h3>${name}</h3>`;
-        card.onclick = ()=> selectOption(name,card);
-        container.appendChild(card);
-    });
-    // No elimination
-    ["No Elimination","Double Elimination"].forEach(name=>{
-        const card = document.createElement("div");
-        card.className="card";
-        card.style.display="flex";
-        card.style.alignItems="center";
-        card.style.justifyContent="center";
-        card.style.fontSize="1.2rem";
-        card.style.fontWeight="bold";
-        card.innerHTML = name;
-        card.onclick = ()=> selectOption(name,card);
-        container.appendChild(card);
+function renderPredictions(){
+    predictionContainer.innerHTML="";
+    if(nominations.length===0){
+        predictionContainer.innerHTML="<p>No active nominations. Showing previous predictions.</p>";
+        return;
+    }
+    nominations.concat(["No Elimination","Double Elimination"]).forEach(name=>{
+        const btn = document.createElement("button");
+        btn.className="prediction-btn";
+        btn.textContent=name;
+        btn.onclick=()=>selectPrediction(btn);
+        predictionContainer.appendChild(btn);
     });
 }
 
-let selectedOption=null;
-function selectOption(name,card){
-    // Deselect all
-    document.querySelectorAll(".card").forEach(c=>c.style.border="2px solid #39FF14");
-    card.style.border="4px solid #FFFFFF";
-    selectedOption=name;
+let selectedPrediction = null;
+function selectPrediction(btn){
+    document.querySelectorAll(".prediction-btn").forEach(b=>b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedPrediction = btn.textContent;
 }
 
-// Submit prediction
-document.getElementById("submitPrediction").onclick = ()=>{
-    if(!currentRound) return alert("No active round!");
-    if(!selectedOption) return alert("Select an option!");
-    currentRound.predictions = currentRound.predictions || {};
-    currentRound.predictions[twitchUser]=selectedOption;
-    localStorage.setItem("rounds",JSON.stringify(rounds));
-    alert(`Prediction submitted: ${selectedOption}`);
+document.getElementById("submitBtn").onclick = ()=>{
+    if(!selectedPrediction){ alert("Select a prediction!"); return; }
+    let votes = JSON.parse(localStorage.getItem("votes") || "{}");
+    const twitchUser = prompt("Enter Twitch username for testing");
+    votes[twitchUser] = selectedPrediction;
+    localStorage.setItem("votes", JSON.stringify(votes));
+    alert("Prediction submitted: "+selectedPrediction);
 }
 
-// Disable voting
-function disableVoting(){
-    document.querySelectorAll(".card").forEach(c=>{
-        c.onclick = null;
-        c.style.opacity=0.6;
-    });
-    document.getElementById("submitPrediction").disabled=true;
-}
+renderPredictions();
 
-// Render past rounds
-function renderPastRounds(){
-    const container = document.getElementById("pastRounds");
-    container.innerHTML="";
-    rounds.slice(0,-1).forEach(r=>{
-        const div = document.createElement("div");
-        div.style.border="2px solid #39FF14";
-        div.style.padding="1rem";
-        div.style.margin="1rem 0";
-        div.innerHTML=`<h3>Round ${r.roundId}</h3>
-        <p>Nominations: ${r.nominations.join(", ")}</p>
-        <p>Result: ${r.result || "Pending"}</p>
-        <p>Your Prediction: ${r.predictions && r.predictions[twitchUser] || "Not voted"}</p>`;
-        container.appendChild(div);
-    });
-}
-
-// Init
-if(currentRound){
-    startCountdown(currentRound.endTime);
-    renderCards(currentRound);
-}
-renderPastRounds();
+// Countdown example (set to 1 hour from now)
+let endTime = new Date().getTime() + 3600*1000;
+let countdownEl = document.getElementById("countdown");
+setInterval(()=>{
+    let now = new Date().getTime();
+    let distance = endTime - now;
+    if(distance<0){ countdownEl.innerText="Prediction round ended."; return; }
+    let hours = Math.floor((distance%(1000*60*60*24))/(1000*60*60));
+    let minutes = Math.floor((distance%(1000*60*60))/(1000*60));
+    let seconds = Math.floor((distance%(1000*60))/1000);
+    countdownEl.innerText = `Time left: ${hours}h ${minutes}m ${seconds}s`;
+},1000);
 </script>
 </body>
 </html>
