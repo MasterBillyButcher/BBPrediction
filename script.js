@@ -20,7 +20,7 @@ const contestantData = [
 ];
 
 // === TWITCH AUTH & ADMIN LOGIC ===
-const CLIENT_ID = 'wtecr95tk5eu66xeugoiph13ba69m9';
+const CLIENT_ID = 'wtecr95eu66xeugoiph13ba69m9';
 const REDIRECT_URI = 'http://127.0.0.1:5500/callback.html';
 const SCOPES = 'user:read:email';
 const ADMIN_USERNAME = 'bobmasterbillie';
@@ -51,10 +51,30 @@ async function fetchTwitchUser() {
   }
 }
 
+// === PAGE RENDERING FUNCTIONS ===
+function createContestantCard(name) {
+  const card = document.createElement("div");
+  card.className = "contestant-card";
+
+  let imgSrc = "";
+  if (name === "No Elimination") {
+    imgSrc = "Contestant/No Elimination.jpg";
+  } else if (name === "Double Elimination") {
+    imgSrc = "Contestant/Double Elimination.jpg";
+  } else {
+    imgSrc = `Contestant/${name}.jpg`;
+  }
+
+  card.innerHTML = `
+    <img src="${imgSrc}" alt="${name}">
+    <h3>${name}</h3>
+  `;
+  return card;
+}
+
 async function renderHomePage() {
   const mainContent = document.getElementById('main-content');
   const user = await fetchTwitchUser();
-
   if (user) {
     mainContent.innerHTML = `
       <div style="text-align: center; margin-top: 50px;">
@@ -82,7 +102,6 @@ async function renderHomePage() {
 async function renderAdminPanel() {
   const adminMain = document.getElementById('admin-main');
   if (!adminMain) return;
-
   const user = await fetchTwitchUser();
   if (!user || user.username !== ADMIN_USERNAME) {
     adminMain.innerHTML = `
@@ -97,7 +116,6 @@ async function renderAdminPanel() {
     });
     return;
   }
-
   adminMain.innerHTML = `
     <h1>⚙️ Admin Panel</h1>
 
@@ -146,7 +164,6 @@ async function renderAdminPanel() {
     "No Elimination",
     "Double Elimination"
   ];
-
   nominationContestants.forEach(name => {
     const card = createContestantCard(name);
     card.addEventListener("click", () => card.classList.toggle("selected"));
@@ -228,32 +245,10 @@ async function renderAdminPanel() {
   });
 }
 
-// === GENERAL FUNCTIONS & PAGE LOGIC ===
-function createContestantCard(name) {
-  const card = document.createElement("div");
-  card.className = "contestant-card";
-
-  let imgSrc = "";
-  if (name === "No Elimination") {
-    imgSrc = "Contestant/No Elimination.jpg";
-  } else if (name === "Double Elimination") {
-    imgSrc = "Contestant/Double Elimination.jpg";
-  } else {
-    imgSrc = `Contestant/${name}.jpg`;
-  }
-
-  card.innerHTML = `
-    <img src="${imgSrc}" alt="${name}">
-    <h3>${name}</h3>
-  `;
-  return card;
-}
-
-// Prediction Page Logic
-const predictContainer = document.getElementById("prediction-options");
-const submitPredictionBtn = document.getElementById("submitPrediction");
-
-if (predictContainer) {
+function renderPredictionPage() {
+  const predictContainer = document.getElementById("prediction-options");
+  const submitPredictionBtn = document.getElementById("submitPrediction");
+  if (!predictContainer || !submitPredictionBtn) return;
   const deadline = localStorage.getItem("deadline");
   const now = new Date().getTime();
   const userPrediction = localStorage.getItem("userPrediction");
@@ -263,11 +258,8 @@ if (predictContainer) {
     nominations.forEach(name => {
       const card = createContestantCard(name);
       predictContainer.appendChild(card);
-
-      if (userPrediction) {
-        if (name === userPrediction) {
-          card.classList.add("predicted-card");
-        }
+      if (userPrediction && name === userPrediction) {
+        card.classList.add("predicted-card");
       } else {
         card.addEventListener("click", () => {
           document.querySelectorAll(".contestant-card").forEach(c => c.classList.remove("selected"));
@@ -297,9 +289,9 @@ if (predictContainer) {
   }
 }
 
-// Contestants Page Logic
-const contestantsList = document.getElementById("contestants-list");
-if (contestantsList) {
+function renderContestantsPage() {
+  const contestantsList = document.getElementById("contestants-list");
+  if (!contestantsList) return;
   contestantData.forEach(contestant => {
     const instagramURL = `https://www.instagram.com/${contestant.instagram}`;
     const card = document.createElement("div");
@@ -314,39 +306,6 @@ if (contestantsList) {
   });
 }
 
-// Countdown
-const countdownEl = document.getElementById("countdown");
-if (countdownEl) {
-  function updateCountdown() {
-    const storedDeadline = localStorage.getItem("deadline");
-    if (!storedDeadline) {
-      countdownEl.textContent = "⏳ Deadline not set by admin.";
-      return;
-    }
-    const deadline = parseInt(storedDeadline);
-    const now = new Date().getTime();
-    const diff = deadline - now;
-    if (diff <= 0) {
-      countdownEl.textContent = "Prediction closed! 🔒";
-      return;
-    }
-    const hrs = Math.floor(diff / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const secs = Math.floor((diff % (1000 * 60)) / 1000);
-    countdownEl.textContent = `⏳ ${hrs}h ${mins}m ${secs}s left`;
-  }
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
-}
-
-// Leaderboard
-const leaderboardBody = document.getElementById("leaderboardBody");
-if (leaderboardBody) renderLeaderboard();
-
-document.getElementById("sortBy")?.addEventListener("change", renderLeaderboard);
-document.getElementById("searchBar")?.addEventListener("input", renderLeaderboard);
-
-// New function to fetch data from the API
 async function fetchLeaderboardData() {
   try {
     const response = await fetch('/api/leaderboard');
@@ -359,22 +318,16 @@ async function fetchLeaderboardData() {
   }
 }
 
-// Update the renderLeaderboard function to be async
 async function renderLeaderboard() {
   const leaderboardBody = document.getElementById("leaderboardBody");
   if (!leaderboardBody) return;
-
   const data = await fetchLeaderboardData();
-
   let filteredData = [...data];
   const sortBy = document.getElementById("sortBy")?.value || "points";
   const search = document.getElementById("searchBar")?.value.toLowerCase() || "";
-
   if (sortBy === "points") filteredData.sort((a, b) => b.score - a.score);
   else filteredData.sort((a, b) => a.name.localeCompare(b.name));
-
   filteredData = filteredData.filter(p => p.name.toLowerCase().includes(search));
-
   leaderboardBody.innerHTML = "";
   filteredData.forEach((p, i) => {
     leaderboardBody.innerHTML += `<tr>
@@ -383,84 +336,18 @@ async function renderLeaderboard() {
   });
 }
 
-// Function to update a player's score
-async function updatePlayerScore(name, points) {
-  try {
-    const response = await fetch('/api/leaderboard', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, score: points }),
-    });
-    if (!response.ok) throw new Error('Failed to update score');
-    console.log('Score updated successfully!');
-  } catch (error) {
-    console.error("Score update error:", error);
-  }
-}
-
-// Initial render for all pages
+// === MAIN LOGIC: INITIALIZE ON PAGE LOAD ===
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
+  const path = window.location.pathname;
+  if (path.includes('index.html') || path === '/') {
     renderHomePage();
-  } else if (window.location.pathname.endsWith('admin.html')) {
+  } else if (path.includes('admin.html')) {
     renderAdminPanel();
-  } else if (window.location.pathname.endsWith('contestants.html')) {
-    const contestantsList = document.getElementById("contestants-list");
-    contestantData.forEach(contestant => {
-      const instagramURL = `https://www.instagram.com/${contestant.instagram}`;
-      const card = document.createElement("div");
-      card.className = "contestant-card";
-      card.innerHTML = `
-        <a href="${instagramURL}" target="_blank">
-          <img src="Contestant/${contestant.name}.jpg" alt="${contestant.name}">
-          <h3>${contestant.name}</h3>
-        </a>
-      `;
-      contestantsList.appendChild(card);
-    });
-  } else if (window.location.pathname.endsWith('predict.html')) {
-    const predictContainer = document.getElementById("prediction-options");
-    const submitPredictionBtn = document.getElementById("submitPrediction");
-    const deadline = localStorage.getItem("deadline");
-    const now = new Date().getTime();
-    const userPrediction = localStorage.getItem("userPrediction");
-
-    if (deadline && now < parseInt(deadline)) {
-      const nominations = JSON.parse(localStorage.getItem("nominations")) || [];
-      nominations.forEach(name => {
-        const card = createContestantCard(name);
-        predictContainer.appendChild(card);
-        if (userPrediction) {
-          if (name === userPrediction) {
-            card.classList.add("predicted-card");
-          }
-        } else {
-          card.addEventListener("click", () => {
-            document.querySelectorAll(".contestant-card").forEach(c => c.classList.remove("selected"));
-            card.classList.add("selected");
-          });
-        }
-      });
-      if (userPrediction) {
-        submitPredictionBtn.disabled = true;
-        submitPredictionBtn.textContent = "Prediction Submitted ✅";
-      } else {
-        submitPredictionBtn.addEventListener("click", () => {
-          const selectedPrediction = document.querySelector(".contestant-card.selected h3");
-          if (selectedPrediction) {
-            localStorage.setItem("userPrediction", selectedPrediction.textContent);
-            alert("Prediction submitted! Thanks for participating! 🎉");
-            window.location.reload();
-          } else {
-            alert("Please select a contestant before submitting your prediction.");
-          }
-        });
-      }
-    } else {
-      predictContainer.innerHTML = "<p>Prediction submissions are currently closed.</p>";
-      submitPredictionBtn.disabled = true;
-    }
-  } else if (window.location.pathname.endsWith('leaderboard.html')) {
+  } else if (path.includes('predict.html')) {
+    renderPredictionPage();
+  } else if (path.includes('contestants.html')) {
+    renderContestantsPage();
+  } else if (path.includes('leaderboard.html')) {
     renderLeaderboard();
   }
 });
