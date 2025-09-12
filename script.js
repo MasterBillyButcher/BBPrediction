@@ -16,7 +16,7 @@ const contestantData = [
   { name: "Pranit More", instagram: "rj_pranit" },
   { name: "Shehbaz Badesha", instagram: "badeshashehbaz" },
   { name: "Tanya Mittal", instagram: "tanyamittalofficial" },
-  { name: "Zeishan Quadri", instagram:  "zeishanquadri83" }
+  { name: "Zeishan Quadri", instagram: "zeishanquadri83" }
 ];
 
 // === TWITCH AUTH & ADMIN LOGIC ===
@@ -129,6 +129,7 @@ async function renderHomePage() {
   }
 }
 
+// NEW: Function to fetch a single user's prediction from the database
 async function fetchUserPrediction(username) {
   try {
     const response = await fetch(`/api/data?type=prediction&user_name=${username}`);
@@ -146,6 +147,7 @@ async function renderPredictionPage() {
   const predictContainer = document.getElementById("prediction-options");
   const submitPredictionBtn = document.getElementById("submitPrediction");
   if (!predictContainer || !submitPredictionBtn) return;
+
   const deadline = localStorage.getItem("deadline");
   const now = new Date().getTime();
   const user = await fetchTwitchUser();
@@ -156,6 +158,7 @@ async function renderPredictionPage() {
     return;
   }
 
+  // UPDATED: Fetch prediction from the database instead of local storage
   const userPrediction = await fetchUserPrediction(user.username);
 
   if (deadline && now < parseInt(deadline)) {
@@ -183,6 +186,7 @@ async function renderPredictionPage() {
         const selectedPrediction = document.querySelector("#prediction-options > div.border-green-500 h3");
         if (selectedPrediction) {
           try {
+            // UPDATED: Save prediction to the database
             const response = await fetch('/api/data', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
