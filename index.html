@@ -37,7 +37,7 @@ loginBtn.onclick = () => {
 if(window.location.hash){
   const token = window.location.hash.split('&')[0].split('=')[1];
   localStorage.setItem('twitch_token', token);
-  localStorage.setItem('twitch_user','bobmasterbillie'); // For testing, replace with actual user fetching
+  localStorage.setItem('twitch_user','bobmasterbillie'); // Replace with Twitch API fetch for real username
   loginBtn.style.display='none';
   logoutBtn.style.display='inline-block';
   if(['bobmasterbillie'].includes('bobmasterbillie')) document.getElementById('adminLink').style.display='inline-block';

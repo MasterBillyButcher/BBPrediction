@@ -17,44 +17,74 @@
 
 <section class="center-screen">
 <h2>Make Your Prediction 🔮</h2>
-<div class="countdown" id="countdown">Prediction ends in: --:--:--</div>
-<div class="grid-container" id="predictionOptions">
-  <!-- JS will populate nominated contestants and extra options -->
+<p>Click a contestant or option and confirm your choice.</p>
+
+<div class="grid-container" id="predictionGrid">
+  <!-- Nominated options will appear here -->
+</div>
+
+<div class="center-screen">
+<button id="confirmBtn" disabled>Confirm Prediction</button>
+<div class="countdown" id="countdown"></div>
 </div>
 </section>
 
 <script>
-let user = localStorage.getItem('twitch_user');
-if(!user){ alert('Please login first'); window.location='index.html'; }
-if(['bobmasterbillie'].includes(user)) document.getElementById('adminLink').style.display='inline-block';
+let nominated = JSON.parse(localStorage.getItem('nominated')||'[]');
+const grid = document.getElementById('predictionGrid');
+let selected = null;
 
-const nominations = JSON.parse(localStorage.getItem('nominations')) || [];
-const predictionContainer = document.getElementById('predictionOptions');
-nominations.push({name:'No Elimination',img:'Contestant/no_elimination.jpg'});
-nominations.push({name:'Double Elimination',img:'Contestant/double_elimination.jpg'});
-
-nominations.forEach(n => {
+// Build prediction options
+nominated.forEach(name=>{
   const div = document.createElement('div');
-  div.className='prediction-option';
-  div.innerHTML=`<img src="${n.img}" alt="${n.name}"><h3>${n.name}</h3>`;
-  div.onclick=()=>{ localStorage.setItem('user_prediction',n.name); alert('Prediction saved: '+n.name); };
-  predictionContainer.appendChild(div);
+  div.classList.add('prediction-option');
+  div.innerHTML = `<img src="Contestant/${name}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
+  div.onclick = ()=>{
+    document.querySelectorAll('.prediction-option').forEach(c=>c.classList.remove('selected'));
+    div.classList.add('selected');
+    selected=name;
+    document.getElementById('confirmBtn').disabled=false;
+  }
+  grid.appendChild(div);
 });
 
-// Countdown Timer
-let endTime = localStorage.getItem('prediction_end') ? new Date(localStorage.getItem('prediction_end')) : new Date(Date.now()+3600000);
+// Countdown timer
+let endTime = new Date(localStorage.getItem('predictionEnd'));
 function updateCountdown(){
-  let now = new Date();
-  let diff = endTime-now;
-  if(diff<0) document.getElementById('countdown').innerText='Prediction closed';
-  else{
-    let h=Math.floor(diff/3600000);
-    let m=Math.floor(diff%3600000/60000);
-    let s=Math.floor(diff%60000/1000);
-    document.getElementById('countdown').innerText=`Prediction ends in: ${h}:${m}:${s}`;
+  const now = new Date();
+  let diff = endTime - now;
+  if(diff <= 0){
+    document.getElementById('countdown').innerText='Prediction ended';
+    document.querySelectorAll('.prediction-option').forEach(c=>c.classList.add('disabled'));
+    document.getElementById('confirmBtn').disabled=true;
+  }else{
+    const h=Math.floor(diff/3600000);
+    const m=Math.floor((diff%3600000)/60000);
+    const s=Math.floor((diff%60000)/1000);
+    document.getElementById('countdown').innerText=`Ends in ${h}h ${m}m ${s}s`;
   }
 }
 setInterval(updateCountdown,1000);
+updateCountdown();
+
+document.getElementById('confirmBtn').onclick = ()=>{
+  if(selected){
+    alert('You predicted: '+selected);
+    localStorage.setItem('lastPrediction',selected);
+  }
+}
+
+// Show last prediction if prediction ended
+if(new Date() > endTime){
+  const last = localStorage.getItem('lastPrediction');
+  if(last){
+    alert('Last prediction was: '+last);
+  }
+}
+
+// Show admin link if admin user
+let user = localStorage.getItem('twitch_user');
+if(user==='bobmasterbillie') document.getElementById('adminLink').style.display='inline-block';
 </script>
 </body>
 </html>

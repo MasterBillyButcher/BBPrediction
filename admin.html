@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin | Bigg Boss 19</title>
+<title>Admin Panel | Bigg Boss 19</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,49 +12,73 @@
   <a href="predict.html">Predict</a>
   <a href="leaderboard.html">Leaderboard</a>
   <a href="contestants.html">Contestants</a>
-  <a href="admin.html" id="adminLink">Admin</a>
+  <a href="admin.html">Admin</a>
 </div>
 
 <section class="center-screen">
 <h2>Admin Panel ⚙️</h2>
-<p>Select nominated contestants and set prediction end time</p>
+<p>Click on contestants to nominate them. You can also include special options: No Elimination / Double Elimination.</p>
 
-<label>Prediction End Date & Time:</label><br>
-<input type="datetime-local" id="endTime"><br><br>
-
-<div class="grid-container" id="adminContestants">
-  <!-- Populate contestants dynamically -->
+<div class="grid-container" id="adminGrid">
+  <!-- Contestant cards -->
 </div>
 
-<button id="publishBtn">Publish Nominations</button>
+<div class="center-screen">
+<label>Prediction End Date & Time:</label>
+<input type="datetime-local" id="endTime">
+<br>
+<button onclick="publishNominations()">Publish Nominations</button>
+<button onclick="setPredictionResult()">Set Prediction Result</button>
+</div>
 </section>
 
 <script>
-let user = localStorage.getItem('twitch_user');
-if(user!=='bobmasterbillie'){ alert('Access denied'); window.location='index.html'; }
-
 const contestants = [
   "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
   "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
   "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
-  "Tanya Mittal","Zeishan Quadri"
+  "Tanya Mittal","Zeishan Quadri","No Elimination","Double Elimination"
 ];
 
-const container = document.getElementById('adminContestants');
+const adminGrid = document.getElementById('adminGrid');
+let selected = [];
+
 contestants.forEach(name=>{
-  const div=document.createElement('div');
-  div.className='prediction-option';
-  div.innerHTML=`<img src="Contestant/${name}.jpg"><h3>${name}</h3><input type="checkbox" value="${name}">`;
-  container.appendChild(div);
+  const div = document.createElement('div');
+  div.classList.add('card');
+  div.innerHTML = `<img src="Contestant/${name}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3><input type="checkbox" class="hidden-checkbox">`;
+  div.onclick = ()=>{
+    div.classList.toggle('selected');
+    const checkbox = div.querySelector('input');
+    checkbox.checked = div.classList.contains('selected');
+    if(checkbox.checked) selected.push(name);
+    else selected = selected.filter(x=>x!==name);
+  }
+  adminGrid.appendChild(div);
 });
 
-document.getElementById('publishBtn').onclick = ()=>{
-  const selected = Array.from(container.querySelectorAll('input:checked')).map(i=>i.value);
-  localStorage.setItem('nominations', JSON.stringify(selected));
-  const end = document.getElementById('endTime').value;
-  if(end) localStorage.setItem('prediction_end', new Date(end));
-  alert('Nominations published!');
-};
+function publishNominations(){
+  const endTime = document.getElementById('endTime').value;
+  if(!endTime){
+    alert('Select prediction end time first!');
+    return;
+  }
+  localStorage.setItem('nominated', JSON.stringify(selected));
+  localStorage.setItem('predictionEnd', endTime);
+  alert('Nominations published! Users can now predict until '+endTime);
+}
+
+function setPredictionResult(){
+  const now = new Date();
+  const end = new Date(localStorage.getItem('predictionEnd'));
+  if(now < end){
+    alert('Prediction not ended yet!');
+    return;
+  }
+  const winner = prompt('Enter the winning prediction:');
+  localStorage.setItem('predictionResult', winner);
+  alert('Prediction result set to: '+winner);
+}
 </script>
 </body>
 </html>
