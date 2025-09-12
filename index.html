@@ -3,24 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bigg Boss 19 Prediction Game</title>
+<title>Bigg Boss 19 | Home</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="center-screen">
-  <h1>Bigg Boss 19 Prediction Game</h1>
-  <p>Login with Twitch to participate and predict outcomes!</p>
-  <button id="twitchLogin">Login with Twitch</button>
+<div class="navbar">
+  <a href="index.html">Home</a>
+  <a href="predict.html">Predict</a>
+  <a href="leaderboard.html">Leaderboard</a>
+  <a href="contestants.html">Contestants</a>
+  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
 
-<script>
-const client_id = "wtecr95tk5eu66xeugoiph13ba69m9";
-const redirect_uri = "https://bb-prediction.vercel.app/callback.html";
+<section class="center-screen">
+  <h1>Bigg Boss 19 Prediction Game</h1>
+  <p>Login with Twitch to predict and climb the leaderboard.</p>
+  <button id="loginBtn">Login with Twitch</button>
+  <button id="logoutBtn" style="display:none;">Logout</button>
+</section>
 
-document.getElementById('twitchLogin').onclick = () => {
-  const url = `https://id.twitch.tv/oauth2/authorize?client_id=${client_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&response_type=token&scope=user:read:email`;
-  window.location.href = url;
+<script>
+const CLIENT_ID = 'wtecr95tk5eu66xeugoiph13ba69m9';
+const REDIRECT_URI = window.location.origin + '/index.html';
+
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+loginBtn.onclick = () => {
+  window.location = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=user:read:email`;
 };
+
+// Handle token in URL
+if(window.location.hash){
+  const token = window.location.hash.split('&')[0].split('=')[1];
+  localStorage.setItem('twitch_token', token);
+  localStorage.setItem('twitch_user','bobmasterbillie'); // For testing, replace with actual user fetching
+  loginBtn.style.display='none';
+  logoutBtn.style.display='inline-block';
+  if(['bobmasterbillie'].includes('bobmasterbillie')) document.getElementById('adminLink').style.display='inline-block';
+}
+
+logoutBtn.onclick = () => {
+  localStorage.removeItem('twitch_token');
+  localStorage.removeItem('twitch_user');
+  window.location.reload();
+}
 </script>
 </body>
 </html>

@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contestants | Bigg Boss 19</title>
 <link rel="stylesheet" href="style.css">
+<style>
+body{background:#121212;color:#fff;font-family:'Roboto',sans-serif;margin:0;padding:0;}
+.navbar{display:flex;justify-content:center;gap:2rem;padding:1rem;background:#1E1E1E;position:sticky;top:0;z-index:1000;}
+.navbar a{color:#39FF14;text-decoration:none;font-weight:bold;font-family:'Montserrat',sans-serif;}
+.center-screen{text-align:center;padding:2rem;}
+.contestants{display:grid;grid-template-columns:repeat(5,1fr);gap:1.5rem;margin-top:2rem;}
+.card{background:#1E1E1E;border-radius:12px;text-align:center;overflow:hidden;box-shadow:0 0 15px #39FF14;transition:transform 0.3s, box-shadow 0.3s;}
+.card:hover{transform:scale(1.05);box-shadow:0 0 30px #39FF14;}
+.card img{width:100%;height:250px;object-fit:cover;border-bottom:2px solid #39FF14;}
+.card h3{margin:0.5rem 0;font-family:'Montserrat',sans-serif;color:#39FF14;}
+</style>
 </head>
 <body>
 
@@ -13,35 +24,38 @@
   <a href="predict.html">Predict</a>
   <a href="leaderboard.html">Leaderboard</a>
   <a href="contestants.html">Contestants</a>
-  <a href="rules.html">Rules</a>
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
 
-<div class="center-screen">
-  <h2>Meet the Contestants 👤</h2>
-  <div class="contestants" id="contestantsContainer"></div>
+<section class="center-screen">
+<h2>Meet the Contestants 👤</h2>
+<div class="contestants">
+  <div class="card"><img src="Contestant/Abhishek Bajaj.jpg" alt="Abhishek Bajaj"><h3>Abhishek Bajaj</h3></div>
+  <div class="card"><img src="Contestant/Amaal Mallik.jpg" alt="Amaal Mallik"><h3>Amaal Mallik</h3></div>
+  <div class="card"><img src="Contestant/Ashnoor Kaur.jpg" alt="Ashnoor Kaur"><h3>Ashnoor Kaur</h3></div>
+  <div class="card"><img src="Contestant/Awez Darbar.jpg" alt="Awez Darbar"><h3>Awez Darbar</h3></div>
+  <div class="card"><img src="Contestant/Baseer Ali.jpg" alt="Baseer Ali"><h3>Baseer Ali</h3></div>
+  <div class="card"><img src="Contestant/Farhana Bhatt.jpg" alt="Farhana Bhatt"><h3>Farhana Bhatt</h3></div>
+  <div class="card"><img src="Contestant/Gaurav Khanna.jpg" alt="Gaurav Khanna"><h3>Gaurav Khanna</h3></div>
+  <div class="card"><img src="Contestant/Kunickaa Sadanand.jpg" alt="Kunickaa Sadanand"><h3>Kunickaa Sadanand</h3></div>
+  <div class="card"><img src="Contestant/Mridul Tiwari.jpg" alt="Mridul Tiwari"><h3>Mridul Tiwari</h3></div>
+  <div class="card"><img src="Contestant/Nagma Mirajkar.jpg" alt="Nagma Mirajkar"><h3>Nagma Mirajkar</h3></div>
+  <div class="card"><img src="Contestant/Natalia Janoszek.jpg" alt="Natalia Janoszek"><h3>Natalia Janoszek</h3></div>
+  <div class="card"><img src="Contestant/Neelam Giri.jpg" alt="Neelam Giri"><h3>Neelam Giri</h3></div>
+  <div class="card"><img src="Contestant/Nehal Chudasama.jpg" alt="Nehal Chudasama"><h3>Nehal Chudasama</h3></div>
+  <div class="card"><img src="Contestant/Pranit More.jpg" alt="Pranit More"><h3>Pranit More</h3></div>
+  <div class="card"><img src="Contestant/Shehbaz Badesha.jpg" alt="Shehbaz Badesha"><h3>Shehbaz Badesha</h3></div>
+  <div class="card"><img src="Contestant/Tanya Mittal.jpg" alt="Tanya Mittal"><h3>Tanya Mittal</h3></div>
+  <div class="card"><img src="Contestant/Zeishan Quadri.jpg" alt="Zeishan Quadri"><h3>Zeishan Quadri</h3></div>
 </div>
+</section>
 
 <script>
-const user = localStorage.getItem('twitch_user');
-const adminList=['bobmasterbillie'];
-if(user && adminList.includes(user)) document.getElementById('adminLink').style.display='inline-block';
-
-const contestantNames=[
-  "Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri",
-  "Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik",
-  "Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma",
-  "Mridul Tiwari","Shehbaz Badesha"
-];
-
-const container=document.getElementById('contestantsContainer');
-contestantNames.forEach(name=>{
-  const card=document.createElement('div');
-  card.classList.add('card');
-  const imgName='Contestant/'+name+'.jpg';
-  card.innerHTML=`<img src="${imgName}" alt="${name}"><h3>${name}</h3>`;
-  container.appendChild(card);
-});
+// Show admin link if user is admin
+let user = localStorage.getItem('twitch_user');
+if(['bobmasterbillie'].includes(user)){
+  document.getElementById('adminLink').style.display='inline-block';
+}
 </script>
 
 </body>

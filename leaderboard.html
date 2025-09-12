@@ -7,50 +7,35 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div class="navbar">
   <a href="index.html">Home</a>
   <a href="predict.html">Predict</a>
   <a href="leaderboard.html">Leaderboard</a>
   <a href="contestants.html">Contestants</a>
-  <a href="rules.html">Rules</a>
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
 
-<div class="center-screen">
-  <h2>Leaderboard 🏆</h2>
-  <table class="table-leaderboard" id="leaderboardTable">
-    <tr><th>Rank</th><th>User</th><th>Points</th></tr>
-  </table>
-</div>
+<section class="center-screen">
+<h2>Leaderboard 🏆</h2>
+<table border="1" style="width:80%;margin:0 auto;border-collapse:collapse;text-align:center;">
+<tr><th>Rank</th><th>User</th><th>Points</th></tr>
+<tbody id="leaderboardBody"></tbody>
+</table>
+</section>
 
 <script>
-const user = localStorage.getItem('twitch_user');
-const adminList=['bobmasterbillie'];
-if(user && adminList.includes(user)) document.getElementById('adminLink').style.display='inline-block';
-
-function calculateLeaderboard(){
-  const allPreds = JSON.parse(localStorage.getItem('predictions')||'[]');
-  const result = localStorage.getItem('prediction_result');
-  const points = {};
-  if(result){
-    allPreds.forEach(p=>{
-      if(!points[p.user]) points[p.user]=0;
-      if(p.option===result) points[p.user]+=1;
-    });
-  }
-
-  const sortedUsers = Object.keys(points).sort((a,b)=>points[b]-points[a]);
-  const table = document.getElementById('leaderboardTable');
-  table.innerHTML='<tr><th>Rank</th><th>User</th><th>Points</th></tr>';
-  sortedUsers.forEach((user,i)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td><td>${user}</td><td>${points[user]}</td>`;
-    table.appendChild(tr);
-  });
-}
-calculateLeaderboard();
+let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [
+  {user:'bobmasterbillie',points:5},
+  {user:'player1',points:3},
+  {user:'player2',points:1}
+];
+const tbody = document.getElementById('leaderboardBody');
+leaderboard.sort((a,b)=>b.points-a.points);
+leaderboard.forEach((l,i)=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML=`<td>${i+1}</td><td>${l.user}</td><td>${l.points}</td>`;
+  tbody.appendChild(tr);
+});
 </script>
-
 </body>
 </html>

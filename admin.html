@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel | Bigg Boss 19</title>
+<title>Admin | Bigg Boss 19</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,72 +12,49 @@
   <a href="predict.html">Predict</a>
   <a href="leaderboard.html">Leaderboard</a>
   <a href="contestants.html">Contestants</a>
-  <a href="rules.html">Rules</a>
-  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
+  <a href="admin.html" id="adminLink">Admin</a>
 </div>
 
-<div class="center-screen admin-panel">
-  <h2>Admin Panel ⚙️</h2>
-  <div class="admin-cards" id="adminCards">
-    <!-- Contestant cards + extra options will be generated here by JS -->
-  </div>
-  <p>Prediction End Date & Time:</p>
-  <input type="datetime-local" id="predictionEnd">
-  <button onclick="publish()">Publish Nominations</button>
+<section class="center-screen">
+<h2>Admin Panel ⚙️</h2>
+<p>Select nominated contestants and set prediction end time</p>
 
-  <h3>Set Result After Prediction Ends</h3>
-  <select id="resultSelect"></select>
-  <button onclick="setResult()">Set Result</button>
+<label>Prediction End Date & Time:</label><br>
+<input type="datetime-local" id="endTime"><br><br>
+
+<div class="grid-container" id="adminContestants">
+  <!-- Populate contestants dynamically -->
 </div>
+
+<button id="publishBtn">Publish Nominations</button>
+</section>
 
 <script>
-const user = localStorage.getItem('twitch_user');
-const adminList = ['bobmasterbillie'];
-if(!user || !adminList.includes(user)){
-  alert('Access Denied!');
-  window.location.href='index.html';
-}else{
-  document.getElementById('adminLink').style.display='inline-block';
-}
+let user = localStorage.getItem('twitch_user');
+if(user!=='bobmasterbillie'){ alert('Access denied'); window.location='index.html'; }
 
 const contestants = [
-  "Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri",
-  "Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik",
-  "Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma",
-  "Mridul Tiwari","Shehbaz Badesha","No Elimination","Double Elimination"
+  "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
+  "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
+  "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
+  "Tanya Mittal","Zeishan Quadri"
 ];
 
-const cardsContainer = document.getElementById('adminCards');
+const container = document.getElementById('adminContestants');
 contestants.forEach(name=>{
-  const card = document.createElement('div');
-  card.classList.add('card');
-  if(name.includes('No') || name.includes('Double')) card.style.background='#2c2c2c';
-  const imgName = 'Contestant/' + name.replace(/ /g,' ') + '.jpg';
-  card.innerHTML = `<img src="${imgName}" alt="${name}"><h3>${name}</h3>`;
-  card.onclick = ()=>{ card.classList.toggle('selected'); }
-  cardsContainer.appendChild(card);
+  const div=document.createElement('div');
+  div.className='prediction-option';
+  div.innerHTML=`<img src="Contestant/${name}.jpg"><h3>${name}</h3><input type="checkbox" value="${name}">`;
+  container.appendChild(div);
 });
 
-function publish(){
-  const selected = Array.from(document.querySelectorAll('.card.selected')).map(c=>c.querySelector('h3').textContent);
-  const endDate = new Date(document.getElementById('predictionEnd').value).getTime();
-  if(selected.length===0){ alert('Select at least one option!'); return; }
-  if(isNaN(endDate)){ alert('Set end time!'); return; }
+document.getElementById('publishBtn').onclick = ()=>{
+  const selected = Array.from(container.querySelectorAll('input:checked')).map(i=>i.value);
   localStorage.setItem('nominations', JSON.stringify(selected));
-  localStorage.setItem('prediction_end', endDate);
+  const end = document.getElementById('endTime').value;
+  if(end) localStorage.setItem('prediction_end', new Date(end));
   alert('Nominations published!');
-}
-
-// set result
-const resultSelect = document.getElementById('resultSelect');
-contestants.forEach(name=>{ const opt = document.createElement('option'); opt.textContent=name; resultSelect.appendChild(opt); });
-function setResult(){
-  const end = parseInt(localStorage.getItem('prediction_end'));
-  if(new Date().getTime() < end){ alert('Prediction not ended yet!'); return; }
-  const result = resultSelect.value;
-  localStorage.setItem('prediction_result', result);
-  alert('Result saved!');
-}
+};
 </script>
 </body>
 </html>
