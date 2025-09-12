@@ -3,20 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rules</title>
+<title>Rules | Bigg Boss 19</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="center-screen">
-<h1>Rules & FAQs 📜</h1>
-<ul>
-<li>Login with Twitch to participate.</li>
-<li>Only 1 prediction per round is allowed.</li>
-<li>Points: 1 point per correct prediction.</li>
-<li>Admin sets nominations and results.</li>
-<li>Previous rounds are viewable but cannot be voted again.</li>
-<li>No cheating; any abuse will result in disqualification.</li>
-</ul>
+
+<div class="navbar">
+  <a href="index.html">Home</a>
+  <a href="predict.html">Predict</a>
+  <a href="leaderboard.html">Leaderboard</a>
+  <a href="contestants.html">Contestants</a>
+  <a href="rules.html">Rules</a>
+  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
+
+<div class="center-screen rules-container">
+  <h2>Rules & FAQs 📜</h2>
+  <ul>
+    <li>Login with Twitch is mandatory to participate.</li>
+    <li>You can only select <strong>one option</strong> per prediction.</li>
+    <li>Predictions close automatically after the countdown ends.</li>
+    <li>After the prediction ends, you can view previous predictions and results.</li>
+    <li>Points are awarded <strong>1 per correct prediction</strong>.</li>
+    <li>Admin sets the prediction result after the countdown ends.</li>
+    <li>No cheating! Only registered Twitch accounts are valid.</li>
+    <li>Admin panel access is restricted to authorized users only.</li>
+    <li>Double Elimination and No Elimination options are valid prediction choices.</li>
+    <li>Leaderboard updates automatically after the result is set.</li>
+  </ul>
+</div>
+
+<script>
+const user = localStorage.getItem('twitch_user');
+const adminList=['bobmasterbillie'];
+if(user && adminList.includes(user)) document.getElementById('adminLink').style.display='inline-block';
+</script>
+
 </body>
 </html>

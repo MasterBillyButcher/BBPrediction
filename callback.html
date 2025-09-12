@@ -3,31 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Twitch OAuth Callback</title>
+<title>Twitch Callback</title>
 </head>
 <body>
 <script>
-const hash = window.location.hash;
-const params = new URLSearchParams(hash.slice(1));
-const accessToken = params.get("access_token");
+const hash = window.location.hash.substring(1);
+const params = new URLSearchParams(hash);
+const access_token = params.get('access_token');
 
-if(accessToken){
-    fetch("https://api.twitch.tv/helix/users", {
-        headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "Client-ID": "wtecr95tk5eu66xeugoiph13ba69m9"
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        const username = data.data[0].display_name;
-        localStorage.setItem("twitchUsername", username);
-        window.location.href = "index.html";
-    })
-    .catch(err => console.error(err));
-} else {
-    alert("Login failed.");
-    window.location.href = "index.html";
+if(access_token){
+  // Fetch Twitch username
+  fetch('https://api.twitch.tv/helix/users', {
+    headers: {
+      'Authorization': 'Bearer ' + access_token,
+      'Client-Id': 'wtecr95tk5eu66xeugoiph13ba69m9'
+    }
+  }).then(res=>res.json()).then(data=>{
+    if(data.data && data.data.length>0){
+      const username = data.data[0].display_name.toLowerCase();
+      localStorage.setItem('twitch_user', username);
+      window.location.href = 'rules.html';
+    }
+  });
+}else{
+  alert('Login failed!');
+  window.location.href = 'index.html';
 }
 </script>
 </body>

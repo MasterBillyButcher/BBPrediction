@@ -3,66 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Predict</title>
+<title>Predict | Bigg Boss 19</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="navbar">
+  <a href="index.html">Home</a>
+  <a href="predict.html">Predict</a>
+  <a href="leaderboard.html">Leaderboard</a>
+  <a href="contestants.html">Contestants</a>
+  <a href="rules.html">Rules</a>
+  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
+</div>
+
 <div class="center-screen">
-<h1>Make Your Prediction 🔮</h1>
-<p id="countdown"></p>
-<div id="predictionContainer"></div>
-<button id="submitBtn">Submit Prediction</button>
+  <h2>Make Your Prediction 🔮</h2>
+  <div id="countdown" style="font-size:1.5rem; margin:1rem;"></div>
+  <div class="prediction-options" id="optionsContainer"></div>
+  <button id="submitPrediction">Submit</button>
+  <h3>Previous Predictions</h3>
+  <div id="prevPredictions"></div>
 </div>
 
 <script>
-let nominations = JSON.parse(localStorage.getItem("currentNominations")) || [];
-const result = localStorage.getItem("currentResult") || null;
-const predictionContainer = document.getElementById("predictionContainer");
+const user = localStorage.getItem('twitch_user');
+if(!user){ alert('Login required!'); window.location.href='index.html'; }
+const adminList=['bobmasterbillie'];
+if(user && adminList.includes(user)) document.getElementById('adminLink').style.display='inline-block';
 
-function renderPredictions(){
-    predictionContainer.innerHTML="";
-    if(nominations.length===0){
-        predictionContainer.innerHTML="<p>No active nominations. Showing previous predictions.</p>";
-        return;
-    }
-    nominations.concat(["No Elimination","Double Elimination"]).forEach(name=>{
-        const btn = document.createElement("button");
-        btn.className="prediction-btn";
-        btn.textContent=name;
-        btn.onclick=()=>selectPrediction(btn);
-        predictionContainer.appendChild(btn);
-    });
+const nominations = JSON.parse(localStorage.getItem('nominations')||'[]');
+const predictionEnd = parseInt(localStorage.getItem('prediction_end')||0);
+const predictionResult = localStorage.getItem('prediction_result');
+
+const optionsContainer = document.getElementById('optionsContainer');
+let selectedOption = null;
+nominations.forEach(name=>{
+  const card = document.createElement('div');
+  card.classList.add('card');
+  card.innerHTML=`<h3>${name}</h3>`;
+  card.onclick = ()=>{ if(new Date().getTime()<predictionEnd){ selectedOption=name; document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected')); card.classList.add('selected'); } };
+  optionsContainer.appendChild(card);
+});
+
+document.getElementById('submitPrediction').onclick = ()=>{
+  if(!selectedOption){ alert('Select an option!'); return; }
+  if(new Date().getTime()>predictionEnd){ alert('Prediction ended!'); return; }
+  const allPreds = JSON.parse(localStorage.getItem('predictions')||'[]');
+  allPreds.push({user,option:selectedOption});
+  localStorage.setItem('predictions', JSON.stringify(allPreds));
+  alert('Prediction submitted!');
+  renderPrev();
+};
+
+function renderPrev(){
+  const container=document.getElementById('prevPredictions');
+  container.innerHTML='';
+  const preds=JSON.parse(localStorage.getItem('predictions')||'[]');
+  preds.forEach(p=>{
+    const div=document.createElement('div');
+    div.textContent=`${p.user} → ${p.option}${predictionResult? ' | Result: '+predictionResult : ''}`;
+    container.appendChild(div);
+  });
 }
+renderPrev();
 
-let selectedPrediction = null;
-function selectPrediction(btn){
-    document.querySelectorAll(".prediction-btn").forEach(b=>b.classList.remove("selected"));
-    btn.classList.add("selected");
-    selectedPrediction = btn.textContent;
-}
-
-document.getElementById("submitBtn").onclick = ()=>{
-    if(!selectedPrediction){ alert("Select a prediction!"); return; }
-    let votes = JSON.parse(localStorage.getItem("votes") || "{}");
-    const twitchUser = localStorage.getItem("twitchUser");
-    votes[twitchUser] = selectedPrediction;
-    localStorage.setItem("votes", JSON.stringify(votes));
-    alert("Prediction submitted: "+selectedPrediction);
-}
-
-renderPredictions();
-
-// Countdown (settable by admin, here default 1 hour)
-let endTime = new Date().getTime() + 3600*1000;
-let countdownEl = document.getElementById("countdown");
+// countdown
+const countdownEl=document.getElementById('countdown');
 setInterval(()=>{
-    let now = new Date().getTime();
-    let distance = endTime - now;
-    if(distance<0){ countdownEl.innerText="Prediction round ended."; return; }
-    let hours = Math.floor((distance%(1000*60*60*24))/(1000*60*60));
-    let minutes = Math.floor((distance%(1000*60*60))/(1000*60));
-    let seconds = Math.floor((distance%(1000*60))/1000);
-    countdownEl.innerText = `Time left: ${hours}h ${minutes}m ${seconds}s`;
+  const diff=predictionEnd-new Date().getTime();
+  if(diff>0){
+    const mins=Math.floor(diff/60000); const sec=Math.floor((diff%60000)/1000);
+    countdownEl.textContent=`Time left: ${mins}m ${sec}s`;
+  }else countdownEl.textContent='Prediction ended!';
 },1000);
 </script>
 </body>

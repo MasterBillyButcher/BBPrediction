@@ -7,46 +7,20 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="home-bg">
-  <div class="center-screen">
-    <h1>Bigg Boss 19 Prediction Game</h1>
-    <p class="subtitle">Login with Twitch to start predicting 🔮</p>
-    <button id="loginBtn" class="neon-btn">Login with Twitch</button>
-  </div>
+<div class="center-screen">
+  <h1>Bigg Boss 19 Prediction Game</h1>
+  <p>Login with Twitch to participate and predict outcomes!</p>
+  <button id="twitchLogin">Login with Twitch</button>
 </div>
 
 <script>
-const clientId = "wtecr95tk5eu66xeugoiph13ba69m9";
-const redirectUri = "https://bb-prediction.vercel.app/";
+const client_id = "wtecr95tk5eu66xeugoiph13ba69m9";
+const redirect_uri = "https://bb-prediction.vercel.app/callback.html";
 
-document.getElementById("loginBtn").onclick = () => {
-    window.location = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user:read:email`;
-}
-
-// Handle OAuth token
-window.onload = () => {
-    if(window.location.hash){
-        const hash = window.location.hash.substring(1).split('&').reduce((res, item)=>{
-            const parts = item.split('=');
-            res[parts[0]] = parts[1];
-            return res;
-        },{});
-        if(hash.access_token){
-            localStorage.setItem("twitchToken", hash.access_token);
-            fetch('https://api.twitch.tv/helix/users',{
-                headers:{
-                    'Authorization':`Bearer ${hash.access_token}`,
-                    'Client-Id': clientId
-                }
-            })
-            .then(res=>res.json())
-            .then(data=>{
-                localStorage.setItem("twitchUser", data.data[0].login);
-                window.location = "predict.html";
-            });
-        }
-    }
-}
+document.getElementById('twitchLogin').onclick = () => {
+  const url = `https://id.twitch.tv/oauth2/authorize?client_id=${client_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&response_type=token&scope=user:read:email`;
+  window.location.href = url;
+};
 </script>
 </body>
 </html>

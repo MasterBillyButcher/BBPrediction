@@ -3,65 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
+<title>Admin Panel | Bigg Boss 19</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="center-screen">
-<h1>Admin Panel ⚙️</h1>
-<p id="welcome"></p>
-<div id="adminActions" style="display:none;">
-<h3>Select Nominated Contestants</h3>
-<select id="nominations" multiple></select>
-<button onclick="publishNominations()">Publish Nominations</button>
-
-<h3>Set Prediction Result</h3>
-<select id="setResult"></select>
-<button onclick="setResultFunc()">Set Result</button>
+<div class="navbar">
+  <a href="index.html">Home</a>
+  <a href="predict.html">Predict</a>
+  <a href="leaderboard.html">Leaderboard</a>
+  <a href="contestants.html">Contestants</a>
+  <a href="rules.html">Rules</a>
+  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
+
+<div class="center-screen admin-panel">
+  <h2>Admin Panel ⚙️</h2>
+  <div class="admin-cards" id="adminCards">
+    <!-- Contestant cards + extra options will be generated here by JS -->
+  </div>
+  <p>Prediction End Date & Time:</p>
+  <input type="datetime-local" id="predictionEnd">
+  <button onclick="publish()">Publish Nominations</button>
+
+  <h3>Set Result After Prediction Ends</h3>
+  <select id="resultSelect"></select>
+  <button onclick="setResult()">Set Result</button>
 </div>
 
 <script>
-// Admin Twitch usernames
-let admins = ["bobmasterbillie"]; 
-
-// All contestants
-const allContestants = ["Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri","Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik","Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma","Mridul Tiwari","Shehbaz Badesha"];
-
-// Twitch username from OAuth
-const twitchUser = localStorage.getItem("twitchUser");
-document.getElementById("welcome").innerText = `Welcome ${twitchUser}`;
-
-if(admins.includes(twitchUser)){
-    document.getElementById("adminActions").style.display="block";
-
-    const sel1 = document.getElementById("nominations");
-    allContestants.forEach(name=>{
-        const opt = document.createElement("option");
-        opt.textContent = name;
-        sel1.appendChild(opt);
-    });
-
-    const sel2 = document.getElementById("setResult");
-    allContestants.concat(["No Elimination","Double Elimination"]).forEach(name=>{
-        const opt = document.createElement("option");
-        opt.textContent = name;
-        sel2.appendChild(opt);
-    });
+const user = localStorage.getItem('twitch_user');
+const adminList = ['bobmasterbillie'];
+if(!user || !adminList.includes(user)){
+  alert('Access Denied!');
+  window.location.href='index.html';
 }else{
-    alert("You are not an admin!");
+  document.getElementById('adminLink').style.display='inline-block';
 }
 
-function publishNominations(){
-    const selected = Array.from(document.getElementById("nominations").selectedOptions).map(o=>o.value);
-    localStorage.setItem("currentNominations", JSON.stringify(selected));
-    alert("Nominations published: " + selected.join(", "));
+const contestants = [
+  "Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri",
+  "Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik",
+  "Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma",
+  "Mridul Tiwari","Shehbaz Badesha","No Elimination","Double Elimination"
+];
+
+const cardsContainer = document.getElementById('adminCards');
+contestants.forEach(name=>{
+  const card = document.createElement('div');
+  card.classList.add('card');
+  if(name.includes('No') || name.includes('Double')) card.style.background='#2c2c2c';
+  const imgName = 'Contestant/' + name.replace(/ /g,' ') + '.jpg';
+  card.innerHTML = `<img src="${imgName}" alt="${name}"><h3>${name}</h3>`;
+  card.onclick = ()=>{ card.classList.toggle('selected'); }
+  cardsContainer.appendChild(card);
+});
+
+function publish(){
+  const selected = Array.from(document.querySelectorAll('.card.selected')).map(c=>c.querySelector('h3').textContent);
+  const endDate = new Date(document.getElementById('predictionEnd').value).getTime();
+  if(selected.length===0){ alert('Select at least one option!'); return; }
+  if(isNaN(endDate)){ alert('Set end time!'); return; }
+  localStorage.setItem('nominations', JSON.stringify(selected));
+  localStorage.setItem('prediction_end', endDate);
+  alert('Nominations published!');
 }
 
-function setResultFunc(){
-    const res = document.getElementById("setResult").value;
-    localStorage.setItem("currentResult", res);
-    alert("Result set: "+res);
+// set result
+const resultSelect = document.getElementById('resultSelect');
+contestants.forEach(name=>{ const opt = document.createElement('option'); opt.textContent=name; resultSelect.appendChild(opt); });
+function setResult(){
+  const end = parseInt(localStorage.getItem('prediction_end'));
+  if(new Date().getTime() < end){ alert('Prediction not ended yet!'); return; }
+  const result = resultSelect.value;
+  localStorage.setItem('prediction_result', result);
+  alert('Result saved!');
 }
 </script>
 </body>

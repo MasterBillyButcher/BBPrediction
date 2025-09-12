@@ -3,34 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leaderboard</title>
+<title>Leaderboard | Bigg Boss 19</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<div class="navbar">
+  <a href="index.html">Home</a>
+  <a href="predict.html">Predict</a>
+  <a href="leaderboard.html">Leaderboard</a>
+  <a href="contestants.html">Contestants</a>
+  <a href="rules.html">Rules</a>
+  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
+</div>
+
 <div class="center-screen">
-<h1>Leaderboard 🏆</h1>
-<table id="leaderboardTable">
-<tr><th>Rank</th><th>User</th><th>Points</th></tr>
-</table>
+  <h2>Leaderboard 🏆</h2>
+  <table class="table-leaderboard" id="leaderboardTable">
+    <tr><th>Rank</th><th>User</th><th>Points</th></tr>
+  </table>
 </div>
 
 <script>
-const votes = JSON.parse(localStorage.getItem("votes") || "{}");
-const result = localStorage.getItem("currentResult") || null;
+const user = localStorage.getItem('twitch_user');
+const adminList=['bobmasterbillie'];
+if(user && adminList.includes(user)) document.getElementById('adminLink').style.display='inline-block';
 
-let scores = {};
-for(let user in votes){
-    if(!scores[user]) scores[user]=0;
-    if(votes[user]===result) scores[user]+=1;
-}
+function calculateLeaderboard(){
+  const allPreds = JSON.parse(localStorage.getItem('predictions')||'[]');
+  const result = localStorage.getItem('prediction_result');
+  const points = {};
+  if(result){
+    allPreds.forEach(p=>{
+      if(!points[p.user]) points[p.user]=0;
+      if(p.option===result) points[p.user]+=1;
+    });
+  }
 
-let sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
-const table = document.getElementById("leaderboardTable");
-sorted.forEach(([user,points],idx)=>{
-    let tr = document.createElement("tr");
-    tr.innerHTML=`<td>${idx+1}</td><td>${user}</td><td>${points}</td>`;
+  const sortedUsers = Object.keys(points).sort((a,b)=>points[b]-points[a]);
+  const table = document.getElementById('leaderboardTable');
+  table.innerHTML='<tr><th>Rank</th><th>User</th><th>Points</th></tr>';
+  sortedUsers.forEach((user,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${user}</td><td>${points[user]}</td>`;
     table.appendChild(tr);
-});
+  });
+}
+calculateLeaderboard();
 </script>
+
 </body>
 </html>
