@@ -51,7 +51,6 @@ async function fetchTwitchUser() {
   }
 }
 
-// Function to handle showing/hiding the admin link
 async function handleAdminNav() {
   const adminLink = document.getElementById('adminLink');
   if (!adminLink) return;
@@ -130,10 +129,9 @@ async function renderHomePage() {
   }
 }
 
-
 async function fetchUserPrediction(username) {
   try {
-    const response = await fetch(`/api/predictions?user_name=${username}`);
+    const response = await fetch(`/api/data?type=prediction&user_name=${username}`);
     if (response.status === 404) return null;
     if (!response.ok) throw new Error('Failed to fetch prediction');
     const data = await response.json();
@@ -183,13 +181,13 @@ async function renderPredictionPage() {
         const selectedPrediction = document.querySelector(".contestant-card.selected h3");
         if (selectedPrediction) {
           try {
-            const response = await fetch('/api/predictions', {
+            const response = await fetch('/api/data', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ user_name: user.username, prediction: selectedPrediction.textContent }),
+              body: JSON.stringify({ type: 'prediction', user_name: user.username, prediction: selectedPrediction.textContent }),
             });
             if (!response.ok) throw new Error('Failed to save prediction');
-            
+
             alert("Prediction submitted! Thanks for participating! 🎉");
             window.location.reload();
           } catch (error) {
@@ -227,7 +225,7 @@ function renderContestantsPage() {
 
 async function fetchLeaderboardData() {
   try {
-    const response = await fetch('/api/leaderboard');
+    const response = await fetch('/api/data?type=leaderboard');
     if (!response.ok) throw new Error('Failed to fetch leaderboard');
     const data = await response.json();
     return data;
@@ -242,11 +240,12 @@ async function renderLeaderboard() {
   if (!leaderboardBody) return;
   const data = await fetchLeaderboardData();
   let filteredData = [...data];
-  const sortBy = document.getElementById("sortBy")?.value || "points";
+  
+  // No more sorting options, just sort by points
+  filteredData.sort((a, b) => b.score - a.score);
   const search = document.getElementById("searchBar")?.value.toLowerCase() || "";
-  if (sortBy === "points") filteredData.sort((a, b) => b.score - a.score);
-  else filteredData.sort((a, b) => a.name.localeCompare(b.name));
   filteredData = filteredData.filter(p => p.name.toLowerCase().includes(search));
+
   leaderboardBody.innerHTML = "";
   filteredData.forEach((p, i) => {
     leaderboardBody.innerHTML += `<tr>
@@ -255,13 +254,12 @@ async function renderLeaderboard() {
   });
 }
 
-// Function to update a player's score
 async function updatePlayerScore(name, points, isManual) {
   try {
-    const response = await fetch('/api/leaderboard', {
+    const response = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, score: points, isManual }),
+      body: JSON.stringify({ type: 'leaderboard', name, score: points, isManual }),
     });
     if (!response.ok) throw new Error('Failed to update score');
     console.log('Score updated successfully!');
@@ -270,10 +268,9 @@ async function updatePlayerScore(name, points, isManual) {
   }
 }
 
-// === NEW FUNCTION: Update scores for all correct predictions ===
 async function updateAllScores(eliminatedContestant) {
   try {
-    const predictionsResponse = await fetch('/api/predictions');
+    const predictionsResponse = await fetch('/api/data?type=predictions');
     if (!predictionsResponse.ok) throw new Error('Failed to fetch predictions');
     const predictions = await predictionsResponse.json();
 
@@ -285,15 +282,13 @@ async function updateAllScores(eliminatedContestant) {
       alert("No one predicted correctly this week. 😟");
     }
 
-    // Now, update the score for each player who was correct
     for (const player of correctPredictors) {
-      // Add 1 point for a correct prediction
       await updatePlayerScore(player.user_name, 1, false); 
     }
 
     alert("✅ All scores have been updated!");
     // Optional: clear predictions for the next round
-    // await fetch('/api/predictions', { method: 'DELETE' });
+    // await fetch('/api/data?type=predictions', { method: 'DELETE' });
 
   } catch (error) {
     console.error("Error updating scores:", error);
@@ -301,7 +296,6 @@ async function updateAllScores(eliminatedContestant) {
   }
 }
 
-// === PAGE RENDERING FUNCTIONS ===
 async function renderAdminPanel() {
   const adminMain = document.getElementById('admin-main');
   if (!adminMain) return;
@@ -365,7 +359,6 @@ async function renderAdminPanel() {
     </div>
   `;
 
-  // All event listeners for admin panel
   const adminContainer = document.getElementById("admin-contestants");
   const saveBtn = document.getElementById("save-nominations");
   const loadNominationsBtn = document.getElementById("loadNominationsBtn");
@@ -383,10 +376,8 @@ async function renderAdminPanel() {
   const addAdminBtn = document.getElementById("addAdminBtn");
   const currentAdminsEl = document.getElementById("currentAdmins");
 
-  // Display current admins
   currentAdminsEl.textContent = ADMINS.join(', ');
 
-  // Admin Privilege Logic
   addAdminBtn.addEventListener('click', () => {
     const newAdmin = addAdminInput.value.trim();
     if (newAdmin && !ADMINS.includes(newAdmin)) {
@@ -400,8 +391,6 @@ async function renderAdminPanel() {
     }
   });
 
-
-  // Nomination Logic
   const nominationContestants = [
     ...contestantData.map(c => c.name),
     "No Elimination",
@@ -425,7 +414,6 @@ async function renderAdminPanel() {
     alert("✅ Nominations saved successfully!");
   });
 
-  // Load Nominations for Winner Selection
   loadNominationsBtn?.addEventListener("click", () => {
     winnerSelectionContainer.innerHTML = "";
     const nominations = JSON.parse(localStorage.getItem("nominations")) || [];
@@ -439,27 +427,19 @@ async function renderAdminPanel() {
     });
   });
 
-  // Confirm Winner
   confirmWinnerBtn?.addEventListener("click", async () => {
     const selectedWinner = document.querySelector("#admin-winner-selection .contestant-card.selected h3");
     if (selectedWinner) {
       const winnerName = selectedWinner.textContent;
-      localStorage.setItem("winner", winnerName); // Save the winner name locally for display purposes
-      
-      // === THIS IS THE NEW LOGIC ===
-      // Update scores for everyone who got it right
+      localStorage.setItem("winner", winnerName);
       await updateAllScores(winnerName);
-      // === END OF NEW LOGIC ===
-
       alert(`👑 Winner confirmed as ${winnerName}! Scores have been updated.`);
       window.location.reload();
-
     } else {
       alert("Please select a winner before confirming.");
     }
   });
 
-  // Deadline Management
   const storedDeadline = localStorage.getItem("deadline");
   if (storedDeadline) {
     currentDeadlineEl.textContent = new Date(parseInt(storedDeadline)).toLocaleString();
@@ -476,20 +456,27 @@ async function renderAdminPanel() {
     }
   });
 
-  // Delete & Cancel Predictions
-  deletePredictionsBtn?.addEventListener("click", () => {
+  deletePredictionsBtn?.addEventListener("click", async () => {
     if (confirm("Are you sure you want to delete all user predictions? This cannot be undone.")) {
-      // localStorage.removeItem("userPrediction"); // This is no longer needed
-      // TODO: Call API to delete all predictions from the database
-      alert("🗑️ User predictions have been deleted!");
-      window.location.reload();
+      try {
+        const response = await fetch('/api/data', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'predictions' })
+        });
+        if (!response.ok) throw new Error('Failed to delete predictions');
+        alert("🗑️ User predictions have been deleted!");
+        window.location.reload();
+      } catch (error) {
+        console.error("Delete predictions error:", error);
+        alert("There was an error deleting predictions.");
+      }
     }
   });
 
   cancelPredictionBtn?.addEventListener("click", () => {
     if (confirm("Are you sure you want to cancel the current prediction round? This will clear everything!")) {
       localStorage.removeItem("nominations");
-      // localStorage.removeItem("userPrediction"); // No longer needed
       localStorage.removeItem("winner");
       localStorage.removeItem("deadline");
       alert("💥 Prediction round has been canceled!");
@@ -497,16 +484,14 @@ async function renderAdminPanel() {
     }
   });
 
-  // Manual Score Update Logic
   updateScoreBtn?.addEventListener("click", async () => {
     const name = playerNameInput.value.trim();
     const score = parseInt(playerScoreInput.value);
     if (name && !isNaN(score)) {
-      await updatePlayerScore(name, score, true); // True for manual update
+      await updatePlayerScore(name, score, true);
       alert(`Score for ${name} updated successfully!`);
       playerNameInput.value = "";
       playerScoreInput.value = "";
-      // Refresh the leaderboard on the admin page
       renderLeaderboard();
     } else {
       alert("Please enter a valid player name and a number for the score.");
@@ -546,9 +531,7 @@ async function renderTopTen() {
   `;
 }
 
-// === MAIN LOGIC: INITIALIZE ON PAGE LOAD ===
 document.addEventListener('DOMContentLoaded', () => {
-  // Load admin users from local storage if they exist
   const storedAdmins = localStorage.getItem('admin_users');
   if (storedAdmins) {
     ADMINS = JSON.parse(storedAdmins);
