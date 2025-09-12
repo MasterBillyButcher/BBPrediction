@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <div class="navbar">
   <a href="index.html">Home</a>
   <a href="predict.html">Predict</a>
@@ -15,38 +16,103 @@
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
 
-<section class="center-screen">
+<section class="center-screen" id="loginSection">
   <h1>Bigg Boss 19 Prediction Game</h1>
-  <p>Login with Twitch to predict and climb the leaderboard.</p>
+  <p>Login with Twitch to predict and mark your favorite contestants.</p>
   <button id="loginBtn">Login with Twitch</button>
-  <button id="logoutBtn" style="display:none;">Logout</button>
+</section>
+
+<section class="center-screen" id="userSection" style="display:none;">
+  <h2>Welcome, <span id="username"></span>!</h2>
+  <img id="profilePic" src="" alt="Profile Picture" style="border-radius:50%;width:120px;height:120px;">
+  <h3>Mark your favorite contestants 👇</h3>
+  <div class="grid-container" id="favoritesGrid"></div>
+  <button onclick="saveFavorites()">Save Favorites</button>
 </section>
 
 <script>
 const CLIENT_ID = 'wtecr95tk5eu66xeugoiph13ba69m9';
 const REDIRECT_URI = window.location.origin + '/index.html';
 
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-
-loginBtn.onclick = () => {
+// Login button
+document.getElementById('loginBtn').onclick = () => {
   window.location = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=user:read:email`;
 };
 
-// Handle token in URL
+// Handle Twitch OAuth redirect
+let token = localStorage.getItem('twitch_token');
 if(window.location.hash){
-  const token = window.location.hash.split('&')[0].split('=')[1];
-  localStorage.setItem('twitch_token', token);
-  localStorage.setItem('twitch_user','bobmasterbillie'); // Replace with Twitch API fetch for real username
-  loginBtn.style.display='none';
-  logoutBtn.style.display='inline-block';
-  if(['bobmasterbillie'].includes('bobmasterbillie')) document.getElementById('adminLink').style.display='inline-block';
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  if(params.has('access_token')){
+    token = params.get('access_token');
+    localStorage.setItem('twitch_token', token);
+    window.location.hash = '';
+  }
 }
 
-logoutBtn.onclick = () => {
-  localStorage.removeItem('twitch_token');
-  localStorage.removeItem('twitch_user');
-  window.location.reload();
+// Show user section if logged in
+if(token){
+  fetch('https://api.twitch.tv/helix/users', {
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Client-Id': CLIENT_ID
+    }
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    const user = data.data[0];
+    document.getElementById('username').innerText = user.display_name;
+    document.getElementById('profilePic').src = user.profile_image_url;
+
+    document.getElementById('loginSection').style.display='none';
+    document.getElementById('userSection').style.display='block';
+
+    // Show admin link if user is admin
+    if(['bobmasterbillie'].includes(user.display_name)) {
+      document.getElementById('adminLink').style.display='inline-block';
+    }
+
+    loadFavorites();
+  })
+  .catch(err=>{
+    console.error('Twitch API error', err);
+    document.getElementById('loginSection').style.display='block';
+    document.getElementById('userSection').style.display='none';
+  });
+}else{
+  document.getElementById('loginSection').style.display='block';
+  document.getElementById('userSection').style.display='none';
+}
+
+// Favorite contestants
+const contestants = [
+  "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
+  "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
+  "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
+  "Tanya Mittal","Zeishan Quadri"
+];
+
+function loadFavorites(){
+  const favGrid = document.getElementById('favoritesGrid');
+  favGrid.innerHTML = '';
+  const savedFavs = JSON.parse(localStorage.getItem('favorites') || '[]');
+  contestants.forEach(name=>{
+    const div = document.createElement('div');
+    div.classList.add('card');
+    div.innerHTML = `<img src="Contestant/${name}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
+    div.onclick = ()=>{
+      div.classList.toggle('selected');
+    };
+    if(savedFavs.includes(name)) div.classList.add('selected');
+    favGrid.appendChild(div);
+  });
+}
+
+function saveFavorites(){
+  const favs = Array.from(document.querySelectorAll('#favoritesGrid .card.selected')).map(c=>c.querySelector('h3').innerText);
+  localStorage.setItem('favorites', JSON.stringify(favs));
+  alert('Your favorite contestants saved: ' + favs.join(', '));
 }
 </script>
 </body>
