@@ -51,6 +51,19 @@ async function fetchTwitchUser() {
   }
 }
 
+// Function to handle showing/hiding the admin link
+async function handleAdminNav() {
+  const adminLink = document.getElementById('adminLink');
+  if (!adminLink) return;
+
+  const user = await fetchTwitchUser();
+  if (user && user.username === ADMIN_USERNAME) {
+    adminLink.style.display = 'block';
+  } else {
+    adminLink.style.display = 'none';
+  }
+}
+
 // === PAGE RENDERING FUNCTIONS ===
 function createContestantCard(name) {
   const card = document.createElement("div");
@@ -423,6 +436,7 @@ async function renderTopTen() {
 
 // === MAIN LOGIC: INITIALIZE ON PAGE LOAD ===
 document.addEventListener('DOMContentLoaded', () => {
+  handleAdminNav();
   const path = window.location.pathname;
   if (path.includes('index.html') || path === '/') {
     renderHomePage();
@@ -435,5 +449,4 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (path.includes('leaderboard.html')) {
     renderLeaderboard();
   }
-
 });

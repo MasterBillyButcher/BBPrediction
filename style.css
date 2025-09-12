@@ -30,6 +30,11 @@ nav a:hover, nav a.active {
   text-shadow: 0 0 8px #39FF14;
 }
 
+/* Hide admin link by default */
+a#adminLink {
+  display: none;
+}
+
 /* ===== Buttons & Inputs ===== */
 .button-container {
   text-align: center;
