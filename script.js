@@ -5,7 +5,7 @@ const contestantData = [
   { name: "Ashnoor Kaur", instagram: "ashnoorkaur" },
   { name: "Awez Darbar", instagram: "awez_darbar" },
   { name: "Baseer Ali", instagram: "baseer_bob" },
-  { name: "Farhana Bhatt", instagram: "farrhana_bhatt" }, // Corrected name
+  { name: "Farhana Bhatt", instagram: "farrhana_bhatt" },
   { name: "Gaurav Khanna", instagram: "gauravkhannaofficial" },
   { name: "Kunickaa Sadanand", instagram: "iam_kunickaasadanand" },
   { name: "Mridul Tiwari", instagram: "themridul_" },
@@ -57,7 +57,7 @@ const deletePredictionsBtn = document.getElementById("deletePredictionsBtn");
 if (adminContainer) {
   const nominationContestants = [
     "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar",
-    "Baseer Ali","Farhana Bhatt","Kunickaa Sadanand", // Corrected name
+    "Baseer Ali","Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand",
     "Mridul Tiwari","Nagma Mirajkar","Natalia Janoszek","Neelam Giri",
     "Nehal Chudasama","Pranit More","Shehbaz Badesha","Tanya Mittal","Zeishan Quadri",
     "No Elimination", "Double Elimination"
@@ -72,6 +72,12 @@ if (adminContainer) {
   });
 
   saveBtn.addEventListener("click", () => {
+    const storedDeadline = localStorage.getItem("deadline");
+    if (!storedDeadline) {
+      alert("⚠️ Please set a prediction deadline before saving nominations!");
+      return;
+    }
+
     const selected = [];
     document.querySelectorAll("#admin-contestants .contestant-card.selected h3").forEach(el => selected.push(el.textContent));
     localStorage.setItem("nominations", JSON.stringify(selected));
@@ -166,7 +172,7 @@ if (predictContainer) {
           localStorage.setItem("userPrediction", selectedPrediction.textContent);
           alert("Prediction submitted! Thanks for participating! 🎉");
           // Reload page to update UI
-          window.location.reload(); 
+          window.location.reload();
         } else {
           alert("Please select a contestant before submitting your prediction.");
         }

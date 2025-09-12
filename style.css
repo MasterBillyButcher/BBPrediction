@@ -13,7 +13,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  display: flex; 
+  display: flex;
   justify-content: center;
 }
 
@@ -91,6 +91,7 @@ h1, h2 {
   text-align: center;
   transition: transform 0.3s, box-shadow 0.3s;
   width: calc(20% - 20px);
+  min-width: 200px;
   box-sizing: border-box;
   cursor: pointer;
 }
@@ -110,7 +111,7 @@ h1, h2 {
 .contestant-card img {
   max-width: 100%;
   height: auto;
-  border-radius: 12px; 
+  border-radius: 12px;
   object-fit: cover;
   border: 3px solid #39FF14;
   margin-bottom: 10px;
