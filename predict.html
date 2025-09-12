@@ -44,26 +44,31 @@
 <div id="oldPredictions"></div>
 
 <script>
-// Demo user session (replace with Twitch OAuth)
-let user={username:"MasterBillie"}; // Replace with OAuth
+// Replace with Twitch OAuth username
+let user={username:"bobmasterbillie"}; // Example logged-in user
+
+// Admin users
 let adminUsers=["bobmasterbillie","beaststatsofficial","timepasstime"];
 if(adminUsers.includes(user.username.toLowerCase())) document.getElementById('adminLink').style.display='block';
 
-// Current prediction (simulate storage)
-const currentPrediction=JSON.parse(localStorage.getItem('currentPrediction')||'{}');
-const nominations=currentPrediction.nominations||[
+// Nominations list
+const nominations=[
   "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
   "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
   "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
   "Tanya Mittal","Zeishan Quadri","No Elimination","Double Elimination"
 ];
+
+// Get stored current prediction
+const currentPrediction=JSON.parse(localStorage.getItem('currentPrediction')||'{}');
 const endTime=currentPrediction.endTime?new Date(currentPrediction.endTime):null;
 
 const predictGrid=document.getElementById('predictGrid');
 nominations.forEach(name=>{
   const div=document.createElement('div');
   div.classList.add('card');
-  div.innerHTML=`<img src="Contestant/${name}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
+  const imageName=name.replace(/ /g,' ');
+  div.innerHTML=`<img src="Contestant/${imageName}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
   div.onclick=()=>{
     predictGrid.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
     div.classList.add('selected');
@@ -110,4 +115,3 @@ oldPreds.forEach(p=>{
 </section>
 </body>
 </html>
-
