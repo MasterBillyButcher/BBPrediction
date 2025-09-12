@@ -13,17 +13,28 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { name, score } = req.body;
-    if (!name || typeof score !== 'number') {
-      return res.status(400).json({ error: 'Name and a valid score are required.' });
+    const { name, score, isManual } = req.body;
+    if (!name || typeof score !== 'number' || typeof isManual !== 'boolean') {
+      return res.status(400).json({ error: 'Name, a valid score, and isManual flag are required.' });
     }
+
     try {
-      // Upsert: update score if player exists, otherwise insert new player
-      await sql`
-        INSERT INTO players (name, score)
-        VALUES (${name}, ${score})
-        ON CONFLICT (name) DO UPDATE SET score = players.score + EXCLUDED.score;
-      `;
+      if (isManual) {
+        // Upsert: update score if player exists, otherwise insert new player
+        await sql`
+          INSERT INTO players (name, score)
+          VALUES (${name}, ${score})
+          ON CONFLICT (name) DO UPDATE SET score = EXCLUDED.score;
+        `;
+      } else {
+        // Upsert: update score if player exists, otherwise insert new player
+        await sql`
+          INSERT INTO players (name, score)
+          VALUES (${name}, ${score})
+          ON CONFLICT (name) DO UPDATE SET score = players.score + EXCLUDED.score;
+        `;
+      }
+      
       return res.status(201).json({ message: 'Score updated successfully!' });
     } catch (error) {
       console.error(error);

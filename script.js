@@ -21,7 +21,6 @@ const contestantData = [
 
 // === TWITCH AUTH & ADMIN LOGIC ===
 const CLIENT_ID = 'wtecr95tk5eu66xeugoiph13ba69m9';
-// Change this to your Vercel URL when deploying
 const REDIRECT_URI = 'https://bb-prediction.vercel.app/callback.html';
 const SCOPES = 'user:read:email';
 const ADMIN_USERNAME = 'bobmasterbillie';
@@ -82,8 +81,10 @@ async function renderHomePage() {
         <img src="${user.profileImageUrl}" alt="User PFP" style="border-radius: 50%; width: 150px; height: 150px; border: 3px solid #39FF14; box-shadow: 0 0 10px #39FF14;">
         <h1 style="margin-top: 20px;">Welcome, <strong>${user.username}</strong>! 🎉</h1>
         <p style="max-width: 600px; margin: auto;">You are now logged in and ready to make your predictions. Use the navigation bar to get started.</p>
+        <div id="topTenLeaderboard" class="leaderboard-container"></div>
       </div>
     `;
+    renderTopTen();
   } else {
     mainContent.innerHTML = `
       <h1>🎉 Welcome to Bigg Boss 19 Prediction Game</h1>
@@ -262,10 +263,12 @@ async function renderAdminPanel() {
     const name = playerNameInput.value.trim();
     const score = parseInt(playerScoreInput.value);
     if (name && !isNaN(score)) {
-      await updatePlayerScore(name, score);
+      await updatePlayerScore(name, score, true); // True for manual update
       alert(`Score for ${name} updated successfully!`);
       playerNameInput.value = "";
       playerScoreInput.value = "";
+      // Refresh the leaderboard on the admin page
+      renderLeaderboard();
     } else {
       alert("Please enter a valid player name and a number for the score.");
     }
@@ -306,7 +309,7 @@ function renderPredictionPage() {
           if (user) {
             localStorage.setItem("userPrediction", selectedPrediction.textContent);
             // This is where we update the score
-            await updatePlayerScore(user.username, 10); // Give 10 points for a correct prediction
+            await updatePlayerScore(user.username, 1, false); // Add 1 point for a correct prediction
             alert("Prediction submitted! Thanks for participating! 🎉");
             window.location.reload();
           } else {
@@ -372,18 +375,50 @@ async function renderLeaderboard() {
 }
 
 // Function to update a player's score
-async function updatePlayerScore(name, points) {
+async function updatePlayerScore(name, points, isManual) {
   try {
     const response = await fetch('/api/leaderboard', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, score: points }),
+      body: JSON.stringify({ name, score: points, isManual }),
     });
     if (!response.ok) throw new Error('Failed to update score');
     console.log('Score updated successfully!');
   } catch (error) {
     console.error("Score update error:", error);
   }
+}
+
+async function renderTopTen() {
+  const topTenContainer = document.getElementById('topTenLeaderboard');
+  if (!topTenContainer) return;
+  const data = await fetchLeaderboardData();
+  const topTen = data.sort((a, b) => b.score - a.score).slice(0, 10);
+  if (topTen.length === 0) {
+    topTenContainer.innerHTML = "<h2>No scores to display yet.</h2>";
+    return;
+  }
+  topTenContainer.innerHTML = `
+    <h2>Top 10 Players 🏆</h2>
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Player</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${topTen.map((p, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${p.name}</td>
+            <td>${p.score}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
 }
 
 // === MAIN LOGIC: INITIALIZE ON PAGE LOAD ===
