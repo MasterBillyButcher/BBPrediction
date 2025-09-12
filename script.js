@@ -373,10 +373,14 @@ const leaderboardData = [
 
 // Initial render for all pages
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.body.id === 'index-page') {
+  // Check the current page and render the appropriate content
+  if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
     renderHomePage();
-  } else if (document.body.id === 'admin-page') {
+  } else if (window.location.pathname.endsWith('admin.html')) {
     renderAdminPanel();
+  } else if (window.location.pathname.endsWith('contestants.html')) {
+    // The contestants list is already rendered by the check outside the listener
+  } else if (window.location.pathname.endsWith('predict.html')) {
+    // The prediction logic is already triggered by the check outside the listener
   }
-  // Other pages' logic is triggered by their respective scripts
 });

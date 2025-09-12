@@ -2,29 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bigg Boss 19 Prediction Game</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+  <title>Callback - Bigg Boss 19</title>
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="index.html" class="active">Home</a>
-      <a href="predict.html">Predict</a>
-      <a href="leaderboard.html">Leaderboard</a>
-      <a href="contestants.html">Contestants</a>
-      <a href="admin.html">Admin</a>
-    </nav>
-  </header>
-
-  <main>
-    <h1>🎉 Welcome to Bigg Boss 19 Prediction Game</h1>
-    <p style="text-align:center; max-width:600px; margin:auto;">
-      Login with Twitch to participate, predict weekly eliminations, and compete on the leaderboard.
-    </p>
-    <div class="button-container">
-      <button id="twitchLoginBtn" class="btn">Login with Twitch</button>
-    </div>
-  </main>
+  <script>
+    // Twitch OAuth callback handler
+    const hash = window.location.hash.substr(1);
+    const params = new URLSearchParams(hash);
+    const token = params.get("access_token");
+    if (token) {
+      localStorage.setItem("twitch_token", token);
+      window.location.href = "index.html";
+    } else {
+      document.body.innerHTML = "<h1>Authentication failed. Please try again.</h1>";
+    }
+  </script>
 </body>
 </html>
