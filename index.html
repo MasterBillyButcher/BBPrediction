@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bigg Boss 19 Prediction Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="center-screen">
+    <h1>Bigg Boss 19 Prediction Game</h1>
+    <p>Login with Twitch to predict outcomes and climb the leaderboard!</p>
+    <button id="twitchLoginBtn">Login with Twitch</button>
+  </div>
+
+<script>
+const clientId = "wtecr95tk5eu66xeugoiph13ba69m9";
+const redirectUri = "http://localhost:5500/callback.html"; // Change when deploying
+const scope = "user:read:email";
+
+document.getElementById("twitchLoginBtn").addEventListener("click", () => {
+    const twitchLoginUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}`;
+    window.location.href = twitchLoginUrl;
+});
+</script>
+</body>
+</html>

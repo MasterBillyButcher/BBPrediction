@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediction Page</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="center-screen">
+<h1>Current Prediction 🔮</h1>
+<div id="countdown"></div>
+
+<div class="card-container" id="predictionCards">
+  <!-- Contestant cards & No/Double elimination will be injected here -->
+</div>
+
+<button id="submitPrediction">Submit Prediction</button>
+
+<h2>Previous Predictions</h2>
+<div id="pastRounds"></div>
+</div>
+
+<script>
+const twitchUser = localStorage.getItem("twitchUsername") || "Guest";
+
+// Sample contestants
+const allContestants = ["Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri","Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik","Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma","Mridul Tiwari","Shehbaz Badesha"];
+
+// Load rounds from localStorage
+let rounds = JSON.parse(localStorage.getItem("rounds")) || [];
+
+// Get current round (last one)
+let currentRound = rounds.length ? rounds[rounds.length-1] : null;
+
+// Countdown
+function startCountdown(endTime){
+    const countdownEl = document.getElementById("countdown");
+    const interval = setInterval(()=>{
+        const now = new Date();
+        const distance = new Date(endTime) - now;
+        if(distance<0){
+            clearInterval(interval);
+            countdownEl.innerHTML = "Voting ended!";
+            disableVoting();
+            return;
+        }
+        const hours = Math.floor(distance/(1000*60*60));
+        const minutes = Math.floor((distance%(1000*60*60))/(1000*60));
+        const seconds = Math.floor((distance%(1000*60))/1000);
+        countdownEl.innerHTML = `Time left: ${hours}h ${minutes}m ${seconds}s`;
+    },1000);
+}
+
+// Render cards
+function renderCards(round){
+    const container = document.getElementById("predictionCards");
+    container.innerHTML = "";
+    if(!round) return;
+    round.nominations.forEach(name=>{
+        const card = document.createElement("div");
+        card.className="card";
+        card.innerHTML = `<img src="Contestent/${name}.jpg" alt="${name}"><h3>${name}</h3>`;
+        card.onclick = ()=> selectOption(name,card);
+        container.appendChild(card);
+    });
+    // No elimination
+    ["No Elimination","Double Elimination"].forEach(name=>{
+        const card = document.createElement("div");
+        card.className="card";
+        card.style.display="flex";
+        card.style.alignItems="center";
+        card.style.justifyContent="center";
+        card.style.fontSize="1.2rem";
+        card.style.fontWeight="bold";
+        card.innerHTML = name;
+        card.onclick = ()=> selectOption(name,card);
+        container.appendChild(card);
+    });
+}
+
+let selectedOption=null;
+function selectOption(name,card){
+    // Deselect all
+    document.querySelectorAll(".card").forEach(c=>c.style.border="2px solid #39FF14");
+    card.style.border="4px solid #FFFFFF";
+    selectedOption=name;
+}
+
+// Submit prediction
+document.getElementById("submitPrediction").onclick = ()=>{
+    if(!currentRound) return alert("No active round!");
+    if(!selectedOption) return alert("Select an option!");
+    currentRound.predictions = currentRound.predictions || {};
+    currentRound.predictions[twitchUser]=selectedOption;
+    localStorage.setItem("rounds",JSON.stringify(rounds));
+    alert(`Prediction submitted: ${selectedOption}`);
+}
+
+// Disable voting
+function disableVoting(){
+    document.querySelectorAll(".card").forEach(c=>{
+        c.onclick = null;
+        c.style.opacity=0.6;
+    });
+    document.getElementById("submitPrediction").disabled=true;
+}
+
+// Render past rounds
+function renderPastRounds(){
+    const container = document.getElementById("pastRounds");
+    container.innerHTML="";
+    rounds.slice(0,-1).forEach(r=>{
+        const div = document.createElement("div");
+        div.style.border="2px solid #39FF14";
+        div.style.padding="1rem";
+        div.style.margin="1rem 0";
+        div.innerHTML=`<h3>Round ${r.roundId}</h3>
+        <p>Nominations: ${r.nominations.join(", ")}</p>
+        <p>Result: ${r.result || "Pending"}</p>
+        <p>Your Prediction: ${r.predictions && r.predictions[twitchUser] || "Not voted"}</p>`;
+        container.appendChild(div);
+    });
+}
+
+// Init
+if(currentRound){
+    startCountdown(currentRound.endTime);
+    renderCards(currentRound);
+}
+renderPastRounds();
+</script>
+</body>
+</html>

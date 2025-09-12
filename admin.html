@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="center-screen">
+<h1>Admin Panel ⚙️</h1>
+<p>Pick nominations, set end time, and publish round</p>
+
+<select id="nominees" multiple size="8" style="width:220px;">
+<!-- Filled dynamically -->
+</select>
+<br>
+<input type="datetime-local" id="endTime">
+<br>
+<button id="publishRound">Publish Round</button>
+
+<h2>Set Result for Previous Rounds</h2>
+<select id="roundSelect">
+<option value="">Select Round</option>
+</select>
+<select id="resultSelect">
+<!-- nominees filled dynamically -->
+</select>
+<br>
+<button id="setResult">Set Result</button>
+</div>
+
+<script>
+const twitchUser = localStorage.getItem("twitchUsername");
+const adminUsername = "YOUR_TWITCH_USERNAME"; // replace
+
+if(twitchUser !== adminUsername){
+    alert("Access Denied: Only Admin can access this page.");
+    window.location.href="index.html";
+}
+
+const allContestants = ["Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri","Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik","Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma","Mridul Tiwari","Shehbaz Badesha"];
+const nomineesEl=document.getElementById("nominees");
+allContestants.forEach(c=>{
+    const opt=document.createElement("option");
+    opt.value=opt.textContent=c;
+    nomineesEl.appendChild(opt);
+});
+
+let rounds = JSON.parse(localStorage.getItem("rounds")) || [];
+const roundSelect = document.getElementById("roundSelect");
+const resultSelect = document.getElementById("resultSelect");
+
+function refreshRounds(){
+    roundSelect.innerHTML="<option value=''>Select Round</option>";
+    rounds.forEach(r=>{
+        const opt=document.createElement("option");
+        opt.value=r.roundId;
+        opt.textContent=`Round ${r.roundId}`;
+        roundSelect.appendChild(opt);
+    });
+}
+
+roundSelect.onchange = ()=>{
+    const selectedId = parseInt(roundSelect.value);
+    const round = rounds.find(r=>r.roundId===selectedId);
+    resultSelect.innerHTML="";
+    if(round) round.nominations.forEach(n=>{
+        const opt=document.createElement("option");
+        opt.value=opt.textContent=n;
+        resultSelect.appendChild(opt);
+    });
+};
+
+document.getElementById("publishRound").onclick = ()=>{
+    const selectedNominees = Array.from(nomineesEl.selectedOptions).map(o=>o.value);
+    const endTime = document.getElementById("endTime").value;
+    if(selectedNominees.length===0 || !endTime) return alert("Select nominations & end time");
+    const roundId = rounds.length+1;
+    rounds.push({roundId, nominations:selectedNominees, endTime, predictions:{}, result:null});
+    localStorage.setItem("rounds",JSON.stringify(rounds));
+    alert("Round published!");
+    refreshRounds();
+};
+
+document.getElementById("setResult").onclick = ()=>{
+    const selectedId=parseInt(roundSelect.value);
+    const result = resultSelect.value;
+    if(!selectedId || !result) return alert("Select round & result");
+    const round = rounds.find(r=>r.roundId===selectedId);
+    round.result=result;
+    localStorage.setItem("rounds",JSON.stringify(rounds));
+    alert(`Result for Round ${selectedId} set: ${result}`);
+};
+
+refreshRounds();
+</script>
+</body>
+</html>
