@@ -1,51 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contestants</title>
-<link rel="stylesheet" href="style.css">
-<style>
-.center-screen{display:flex; flex-direction:column; align-items:center; padding-top:120px;}
-.grid-container{display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; width:90%;}
-.card{background:#1E1E1E; border-radius:12px; overflow:hidden; text-align:center; box-shadow:0 0 10px rgba(57,255,20,0.3);}
-.card img{width:100%; height:250px; object-fit:contain;}
-.card h3{margin:0.5rem 0; color:#39FF14; font-family:'Montserrat',sans-serif;}
-</style>
+  <meta charset="UTF-8">
+  <title>Bigg Boss 19 - Contestants</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="navbar">
-  <a href="index.html">Home</a>
-  <a href="predict.html">Predict</a>
-  <a href="leaderboard.html">Leaderboard</a>
-  <a href="contestants.html">Contestants</a>
-  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
-</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="predict.html">Predict</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="contestants.html">Contestants</a>
+  </nav>
 
-<section class="center-screen">
-<h2>Meet the Contestants 👤</h2>
-<div class="grid-container" id="contestantsGrid"></div>
-
-<script>
-const user=JSON.parse(localStorage.getItem('twitchUser')||'null');
-const adminUsers=["bobmasterbillie","beaststatsofficial","timepasstime"];
-if(user && adminUsers.includes(user.username.toLowerCase())) document.getElementById('adminLink').style.display='block';
-
-const contestants=[
-  "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
-  "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
-  "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
-  "Tanya Mittal","Zeishan Quadri"
-];
-
-const grid=document.getElementById('contestantsGrid');
-contestants.forEach(name=>{
-  const div=document.createElement('div'); div.classList.add('card');
-  const imgName=name.replace(/ /g,' ');
-  div.innerHTML=`<img src="Contestant/${imgName}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
-  grid.appendChild(div);
-});
-</script>
-</section>
+  <section class="container">
+    <h1>Meet the Contestants</h1>
+    <div class="gallery">
+      <div class="card"><img src="Contestant/Abhishek Bajaj.jpg" alt=""><p>Abhishek Bajaj</p></div>
+      <div class="card"><img src="Contestant/Amaal Mallik.jpg" alt=""><p>Amaal Mallik</p></div>
+      <div class="card"><img src="Contestant/Ashnoor Kaur.jpg" alt=""><p>Ashnoor Kaur</p></div>
+      <div class="card"><img src="Contestant/Awez Darbar.jpg" alt=""><p>Awez Darbar</p></div>
+      <div class="card"><img src="Contestant/Baseer Ali.jpg" alt=""><p>Baseer Ali</p></div>
+      <div class="card"><img src="Contestant/Farhana Bhatt.jpg" alt=""><p>Farhana Bhatt</p></div>
+      <div class="card"><img src="Contestant/Gaurav Khanna.jpg" alt=""><p>Gaurav Khanna</p></div>
+      <div class="card"><img src="Contestant/Kunickaa Sadanand.jpg" alt=""><p>Kunickaa Sadanand</p></div>
+      <div class="card"><img src="Contestant/Mridul Tiwari.jpg" alt=""><p>Mridul Tiwari</p></div>
+      <div class="card"><img src="Contestant/Nagma Mirajkar.jpg" alt=""><p>Nagma Mirajkar</p></div>
+      <div class="card"><img src="Contestant/Natalia Janoszek.jpg" alt=""><p>Natalia Janoszek</p></div>
+      <div class="card"><img src="Contestant/Neelam Giri.jpg" alt=""><p>Neelam Giri</p></div>
+      <div class="card"><img src="Contestant/Nehal Chudasama.jpg" alt=""><p>Nehal Chudasama</p></div>
+      <div class="card"><img src="Contestant/Pranit More.jpg" alt=""><p>Pranit More</p></div>
+      <div class="card"><img src="Contestant/Shehbaz Badesha.jpg" alt=""><p>Shehbaz Badesha</p></div>
+      <div class="card"><img src="Contestant/Tanya Mittal.jpg" alt=""><p>Tanya Mittal</p></div>
+      <div class="card"><img src="Contestant/Zeishan Quadri.jpg" alt=""><p>Zeishan Quadri</p></div>
+    </div>
+  </section>
 </body>
 </html>

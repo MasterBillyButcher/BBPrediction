@@ -1,86 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prediction</title>
-<link rel="stylesheet" href="style.css">
-<style>
-.center-screen{display:flex; flex-direction:column; align-items:center; padding-top:120px;}
-.grid-container{display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; width:90%;}
-.card{background:#1E1E1E; border-radius:12px; overflow:hidden; text-align:center; box-shadow:0 0 10px rgba(57,255,20,0.3); cursor:pointer; position:relative;}
-.card img{width:100%; height:250px; object-fit:contain;}
-.card.selected::after{content:"✔"; color:#39FF14; font-size:2rem; position:absolute; top:5px; right:10px;}
-#confirmBtn{margin-top:20px;padding:10px 20px;font-size:1rem;background:#39FF14;border:none;border-radius:12px;cursor:pointer;}
-#countdown{margin-top:15px;font-size:1.2rem;}
-</style>
+  <meta charset="UTF-8">
+  <title>Bigg Boss 19 - Predict</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
 </head>
 <body>
-<div class="navbar">
-  <a href="index.html">Home</a>
-  <a href="predict.html">Predict</a>
-  <a href="leaderboard.html">Leaderboard</a>
-  <a href="contestants.html">Contestants</a>
-  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
-</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="predict.html">Predict</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="contestants.html">Contestants</a>
+  </nav>
 
-<section class="center-screen">
-<h2>Make Your Predictions 🔮</h2>
-<div id="countdown"></div>
-<div class="grid-container" id="predictGrid"></div>
-<button id="confirmBtn">Confirm Prediction</button>
-
-<script>
-let user=JSON.parse(localStorage.getItem('twitchUser')||'null');
-const adminUsers=["bobmasterbillie","beaststatsofficial","timepasstime"];
-if(!user){alert("Login required!"); location.href='index.html';}
-if(user && adminUsers.includes(user.username.toLowerCase())) document.getElementById('adminLink').style.display='block';
-
-const current=JSON.parse(localStorage.getItem('currentPrediction')||'{}');
-const predictGrid=document.getElementById('predictGrid');
-const confirmBtn=document.getElementById('confirmBtn');
-
-if(!current.nominations || current.nominations.length===0){
-  predictGrid.innerHTML="<p>No active prediction yet.</p>";
-  confirmBtn.style.display='none';
-}else{
-  current.nominations.forEach(name=>{
-    const div=document.createElement('div'); div.classList.add('card');
-    const imageName=name.replace(/ /g,' ');
-    div.innerHTML=`<img src="Contestant/${imageName}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
-    div.onclick=()=>{
-      predictGrid.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
-      div.classList.add('selected');
-    };
-    predictGrid.appendChild(div);
-  });
-}
-
-confirmBtn.onclick=()=>{
-  const selected=predictGrid.querySelector('.card.selected');
-  if(!selected){alert("Select a contestant!"); return;}
-  const selectedName=selected.querySelector('h3').innerText;
-  let userPredictions=JSON.parse(localStorage.getItem('userPredictions')||'{}');
-  userPredictions[user.username]=selectedName;
-  localStorage.setItem('userPredictions',JSON.stringify(userPredictions));
-  alert("Prediction confirmed: "+selectedName);
-  confirmBtn.disabled=true;
-};
-
-// Countdown
-function updateCountdown(){
-  if(!current.endTime) return;
-  const now=new Date();
-  const end=new Date(current.endTime);
-  const diff=Math.floor((end-now)/1000);
-  const countdown=document.getElementById('countdown');
-  if(diff<=0){countdown.innerText="Prediction ended"; confirmBtn.disabled=true; return;}
-  const h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60;
-  countdown.innerText=`Time Left: ${h}h ${m}m ${s}s`;
-}
-setInterval(updateCountdown,1000);
-updateCountdown();
-</script>
-</section>
+  <section class="container">
+    <h1>Prediction Page</h1>
+    <div id="countdown"></div>
+    <div id="prediction-cards" class="gallery"></div>
+    <button id="submit-prediction">Submit Prediction</button>
+  </section>
 </body>
 </html>

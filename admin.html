@@ -1,94 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
-<link rel="stylesheet" href="style.css">
-<style>
-.grid-container {display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; width:90%; margin-top:20px;}
-.card {background:#1E1E1E; border-radius:12px; overflow:hidden; text-align:center; box-shadow:0 0 10px rgba(57,255,20,0.3); cursor:pointer; position:relative;}
-.card img {width:100%; height:250px; object-fit:contain; background:#000;}
-.card h3 {margin:0.5rem 0; color:#39FF14; font-family:'Montserrat',sans-serif;}
-.card.selected::after {content:"✔"; color:#39FF14; font-size:2rem; position:absolute; top:5px; right:10px;}
-#publishBtn,#setResultBtn{margin-top:20px;padding:10px 20px;font-size:1rem;background:#39FF14;border:none;border-radius:12px;cursor:pointer;}
-</style>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
 </head>
 <body>
-<div class="navbar">
-  <a href="index.html">Home</a>
-  <a href="predict.html">Predict</a>
-  <a href="leaderboard.html">Leaderboard</a>
-  <a href="contestants.html">Contestants</a>
-  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
-</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="predict.html">Predict</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="contestants.html">Contestants</a>
+  </nav>
 
-<section class="center-screen">
-<h2>Admin Panel ⚙️</h2>
-<div>
-<label>End Date & Time: </label>
-<input type="datetime-local" id="endTimeInput">
-</div>
-<div class="grid-container" id="adminGrid"></div>
-<button id="publishBtn">Publish Nominations</button>
+  <section class="container">
+    <h1>Admin Panel</h1>
+    <div id="admin-auth">
+      <input type="password" id="admin-pass" placeholder="Enter Admin Password">
+      <button onclick="checkAdmin()">Login</button>
+    </div>
 
-<h3>Set Prediction Result</h3>
-<select id="resultSelect">
-<option value="">--Select Winner--</option>
-</select>
-<button id="setResultBtn">Set Result</button>
+    <div id="admin-tools" class="hidden">
+      <h2>Nominate Contestants</h2>
+      <div id="admin-contestants" class="gallery"></div>
+      <button onclick="saveNominations()">Save Nominations</button>
 
-<script>
-let user=JSON.parse(localStorage.getItem('twitchUser')||'null');
-const adminUsers=["bobmasterbillie","beaststatsofficial","timepasstime"];
-if(!user || !adminUsers.includes(user.username.toLowerCase())){
-  document.body.innerHTML="<h1>Access Denied</h1>"; throw "Not admin";
-}
-document.getElementById('adminLink').style.display='block';
+      <h2>Manage Scores</h2>
+      <button onclick="updateScores()">Update Scores</button>
 
-const contestants=[
-  "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
-  "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
-  "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
-  "Tanya Mittal","Zeishan Quadri","No Elimination","Double Elimination"
-];
-
-const adminGrid=document.getElementById('adminGrid');
-const resultSelect=document.getElementById('resultSelect');
-
-contestants.forEach(name=>{
-  const div=document.createElement('div'); div.classList.add('card');
-  const imageName=name.replace(/ /g,' ');
-  div.innerHTML=`<img src="Contestant/${imageName}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
-  div.onclick=()=>div.classList.toggle('selected');
-  adminGrid.appendChild(div);
-  if(name!=="No Elimination" && name!=="Double Elimination") {
-    const opt=document.createElement('option');
-    opt.value=name; opt.innerText=name; resultSelect.appendChild(opt);
-  }
-});
-
-document.getElementById('publishBtn').onclick=()=>{
-  const selected=Array.from(adminGrid.querySelectorAll('.card.selected')).map(c=>c.querySelector('h3').innerText);
-  if(selected.length===0){alert("Select nominations!"); return;}
-  const endTime=document.getElementById('endTimeInput').value;
-  if(!endTime){alert("Set end date/time!"); return;}
-  localStorage.setItem('currentPrediction',JSON.stringify({nominations:selected,endTime:endTime}));
-  alert("Nominations published!");
-  adminGrid.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
-};
-
-document.getElementById('setResultBtn').onclick=()=>{
-  const winner=resultSelect.value;
-  if(!winner){alert("Select winner!"); return;}
-  const current=JSON.parse(localStorage.getItem('currentPrediction')||'{}');
-  if(!current.endTime){alert("No active prediction"); return;}
-  if(new Date()<new Date(current.endTime)){alert("Cannot set result before prediction ends!"); return;}
-  current.result=winner;
-  localStorage.setItem('currentPrediction',JSON.stringify(current));
-  alert("Prediction result set: "+winner);
-};
-</script>
-</section>
+      <h2>Game Settings</h2>
+      <button onclick="resetGame()">Reset Game</button>
+    </div>
+  </section>
 </body>
 </html>
