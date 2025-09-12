@@ -25,11 +25,6 @@ const REDIRECT_URI = 'http://127.0.0.1:5500/callback.html'; // Update this to yo
 const SCOPES = 'user:read:email';
 const ADMIN_USERNAME = 'bobmasterbillie';
 
-// Handles Twitch login button click
-document.getElementById('twitchLoginBtn')?.addEventListener('click', () => {
-  window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=${SCOPES}`;
-});
-
 async function fetchTwitchUser() {
   const token = localStorage.getItem('twitch_token');
   if (!token) return null;
@@ -42,9 +37,12 @@ async function fetchTwitchUser() {
     });
     if (!response.ok) throw new Error('Failed to fetch user');
     const data = await response.json();
-    const username = data.data[0].login;
-    localStorage.setItem('twitch_username', username);
-    return username;
+    const user = data.data[0];
+    localStorage.setItem('twitch_username', user.login);
+    return {
+      username: user.login,
+      profileImageUrl: user.profile_image_url
+    };
   } catch (error) {
     console.error("Twitch auth error:", error);
     localStorage.removeItem('twitch_token');
@@ -53,12 +51,40 @@ async function fetchTwitchUser() {
   }
 }
 
+async function renderHomePage() {
+  const mainContent = document.getElementById('main-content');
+  const user = await fetchTwitchUser();
+
+  if (user) {
+    mainContent.innerHTML = `
+      <div style="text-align: center; margin-top: 50px;">
+        <img src="${user.profileImageUrl}" alt="User PFP" style="border-radius: 50%; width: 150px; height: 150px; border: 3px solid #39FF14; box-shadow: 0 0 10px #39FF14;">
+        <h1 style="margin-top: 20px;">Welcome, <strong>${user.username}</strong>! 🎉</h1>
+        <p style="max-width: 600px; margin: auto;">You are now logged in and ready to make your predictions. Use the navigation bar to get started.</p>
+      </div>
+    `;
+  } else {
+    mainContent.innerHTML = `
+      <h1>🎉 Welcome to Bigg Boss 19 Prediction Game</h1>
+      <p style="text-align:center; max-width:600px; margin:auto;">
+        Login with Twitch to participate, predict weekly eliminations, and compete on the leaderboard.
+      </p>
+      <div class="button-container">
+        <button id="twitchLoginBtn" class="btn">Login with Twitch</button>
+      </div>
+    `;
+    document.getElementById('twitchLoginBtn')?.addEventListener('click', () => {
+      window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=${SCOPES}`;
+    });
+  }
+}
+
 async function renderAdminPanel() {
   const adminMain = document.getElementById('admin-main');
   if (!adminMain) return;
 
-  const username = await fetchTwitchUser();
-  if (username !== ADMIN_USERNAME) {
+  const user = await fetchTwitchUser();
+  if (!user || user.username !== ADMIN_USERNAME) {
     adminMain.innerHTML = `
       <h1 style="color: red; text-align: center;">⛔ Permission Denied</h1>
       <p style="text-align: center;">You must be logged in as an administrator to view this page.</p>
@@ -345,7 +371,12 @@ const leaderboardData = [
   { name: "Eve", points: 200 }, { name: "Frank", points: 110 }
 ];
 
-// Initial render for admin panel
+// Initial render for all pages
 document.addEventListener('DOMContentLoaded', () => {
-  renderAdminPanel();
+  if (document.body.id === 'index-page') {
+    renderHomePage();
+  } else if (document.body.id === 'admin-page') {
+    renderAdminPanel();
+  }
+  // Other pages' logic is triggered by their respective scripts
 });
