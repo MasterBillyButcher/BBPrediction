@@ -16,7 +16,7 @@ const contestantData = [
   { name: "Pranit More", instagram: "rj_pranit" },
   { name: "Shehbaz Badesha", instagram: "badeshashehbaz" },
   { name: "Tanya Mittal", instagram: "tanyamittalofficial" },
-  { name: "Zeishan Quadri", instagram: "zeishanquadri83" }
+  { name: "Zeishan Quadri", instagram:  "zeishanquadri83" }
 ];
 
 // === TWITCH AUTH & ADMIN LOGIC ===
@@ -66,7 +66,7 @@ async function handleAdminNav() {
 // === PAGE RENDERING FUNCTIONS ===
 function createContestantCard(name) {
   const card = document.createElement("div");
-  card.className = "contestant-card";
+  card.className = "bg-gray-800 rounded-lg overflow-hidden shadow-2xl transform transition-transform duration-300 hover:scale-105";
 
   let imgSrc = "";
   if (name === "No Elimination") {
@@ -78,8 +78,8 @@ function createContestantCard(name) {
   }
 
   card.innerHTML = `
-    <img src="${imgSrc}" alt="${name}">
-    <h3>${name}</h3>
+    <img src="${imgSrc}" alt="${name}" class="w-full h-auto object-cover">
+    <h3 class="p-4 text-center text-lg font-bold">${name}</h3>
   `;
   return card;
 }
@@ -95,32 +95,32 @@ async function renderHomePage() {
     const userRank = sortedLeaderboard.findIndex(p => p.name === user.username) + 1;
 
     mainContent.innerHTML = `
-      <div style="text-align: center; margin-top: 50px;">
-        <img src="${user.profileImageUrl}" alt="User PFP" style="border-radius: 50%; width: 150px; height: 150px; border: 3px solid #39FF14; box-shadow: 0 0 10px #39FF14;">
-        <h1 style="margin-top: 20px;">Welcome, <strong>${user.username}</strong>! 🎉</h1>
-        <div class="user-stats">
-            <div class="stat-card">
-                <h3>Your Score</h3>
-                <p class="stat-value">${userScore}</p>
+      <div class="p-8 md:p-12 lg:p-16 bg-gray-900 rounded-2xl shadow-2xl border-2 border-green-500">
+        <img src="${user.profileImageUrl}" alt="User PFP" class="mx-auto rounded-full w-32 h-32 md:w-40 md:h-40 border-4 border-green-400 shadow-lg mb-6">
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4">Welcome, <strong class="text-green-400">${user.username}</strong>! 🎉</h1>
+        <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex-1">
+                <h3 class="text-lg text-gray-400">Your Score</h3>
+                <p class="text-4xl font-bold text-green-500 mt-2">${userScore}</p>
             </div>
-            <div class="stat-card">
-                <h3>Your Rank</h3>
-                <p class="stat-value">${userRank > 0 ? userRank : 'N/A'}</p>
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex-1">
+                <h3 class="text-lg text-gray-400">Your Rank</h3>
+                <p class="text-4xl font-bold text-green-500 mt-2">${userRank > 0 ? userRank : 'N/A'}</p>
             </div>
         </div>
-        <p style="max-width: 600px; margin: auto;">You are now logged in and ready to make your predictions. Use the navigation bar to get started.</p>
-        <div id="topTenLeaderboard" class="leaderboard-container"></div>
+        <p class="mt-8 text-lg text-gray-400 max-w-2xl mx-auto">You are now logged in and ready to make your predictions. Use the navigation bar to get started.</p>
+        <div id="topTenLeaderboard" class="mt-12"></div>
       </div>
     `;
     renderTopTen();
   } else {
     mainContent.innerHTML = `
-      <h1>🎉 Welcome to Bigg Boss 19 Prediction Game</h1>
-      <p style="text-align:center; max-width:600px; margin:auto;">
-        Login with Twitch to participate, predict weekly eliminations, and compete on the leaderboard.
-      </p>
-      <div class="button-container">
-        <button id="twitchLoginBtn" class="btn">Login with Twitch</button>
+      <div class="p-8 md:p-12 lg:p-16 bg-gray-900 rounded-2xl shadow-2xl border-2 border-green-500">
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4">🎉 Welcome to BB 19 Prediction Game</h1>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-8">
+            Login with Twitch to participate, predict weekly eliminations, and compete on the leaderboard.
+        </p>
+        <button id="twitchLoginBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition-transform duration-300 hover:scale-105">Login with Twitch</button>
       </div>
     `;
     document.getElementById('twitchLoginBtn')?.addEventListener('click', () => {
@@ -151,7 +151,7 @@ async function renderPredictionPage() {
   const user = await fetchTwitchUser();
 
   if (!user) {
-    predictContainer.innerHTML = "<p>Please login with Twitch to make a prediction.</p>";
+    predictContainer.innerHTML = "<p class='text-lg text-gray-400'>Please login with Twitch to make a prediction.</p>";
     submitPredictionBtn.style.display = 'none';
     return;
   }
@@ -164,11 +164,11 @@ async function renderPredictionPage() {
       const card = createContestantCard(name);
       predictContainer.appendChild(card);
       if (userPrediction && name === userPrediction) {
-        card.classList.add("predicted-card");
+        card.classList.add("border-4", "border-blue-500", "shadow-blue-500");
       } else {
         card.addEventListener("click", () => {
-          document.querySelectorAll(".contestant-card").forEach(c => c.classList.remove("selected"));
-          card.classList.add("selected");
+          document.querySelectorAll("#prediction-options > div").forEach(c => c.classList.remove("border-4", "border-green-500", "shadow-green-500"));
+          card.classList.add("border-4", "border-green-500", "shadow-green-500");
         });
       }
     });
@@ -176,9 +176,11 @@ async function renderPredictionPage() {
     if (userPrediction) {
       submitPredictionBtn.disabled = true;
       submitPredictionBtn.textContent = "Prediction Submitted ✅";
+      submitPredictionBtn.classList.remove("bg-green-500", "hover:bg-green-600");
+      submitPredictionBtn.classList.add("bg-gray-500", "cursor-not-allowed");
     } else {
       submitPredictionBtn.addEventListener("click", async () => {
-        const selectedPrediction = document.querySelector(".contestant-card.selected h3");
+        const selectedPrediction = document.querySelector("#prediction-options > div.border-green-500 h3");
         if (selectedPrediction) {
           try {
             const response = await fetch('/api/data', {
@@ -200,11 +202,10 @@ async function renderPredictionPage() {
       });
     }
   } else {
-    predictContainer.innerHTML = "<p>Prediction submissions are currently closed.</p>";
-    submitPredictionBtn.disabled = true;
+    predictContainer.innerHTML = "<p class='text-lg text-gray-400'>Prediction submissions are currently closed.</p>";
+    submitPredictionBtn.style.display = 'none';
   }
 }
-
 
 function renderContestantsPage() {
   const contestantsList = document.getElementById("contestants-list");
@@ -212,11 +213,11 @@ function renderContestantsPage() {
   contestantData.forEach(contestant => {
     const instagramURL = `https://www.instagram.com/${contestant.instagram}`;
     const card = document.createElement("div");
-    card.className = "contestant-card";
+    card.className = "bg-gray-800 rounded-lg overflow-hidden shadow-2xl transform transition-transform duration-300 hover:scale-105";
     card.innerHTML = `
       <a href="${instagramURL}" target="_blank">
-        <img src="Contestant/${contestant.name}.jpg" alt="${contestant.name}">
-        <h3>${contestant.name}</h3>
+        <img src="Contestant/${contestant.name}.jpg" alt="${contestant.name}" class="w-full h-auto object-cover">
+        <h3 class="p-4 text-center text-lg font-bold">${contestant.name}</h3>
       </a>
     `;
     contestantsList.appendChild(card);
@@ -247,9 +248,13 @@ async function renderLeaderboard() {
 
   leaderboardBody.innerHTML = "";
   filteredData.forEach((p, i) => {
-    leaderboardBody.innerHTML += `<tr>
-      <td>${i + 1}</td><td>${p.name}</td><td>${p.score}</td>
-    </tr>`;
+    leaderboardBody.innerHTML += `
+        <tr class="bg-gray-900 even:bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${i + 1}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${p.name}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-green-400 font-bold">${p.score}</td>
+        </tr>
+    `;
   });
 }
 
@@ -298,10 +303,10 @@ async function renderAdminPanel() {
   const user = await fetchTwitchUser();
   if (!user || !ADMINS.includes(user.username)) {
     adminMain.innerHTML = `
-      <h1 style="color: red; text-align: center;">⛔ Permission Denied</h1>
-      <p style="text-align: center;">You must be logged in as an administrator to view this page.</p>
-      <div class="button-container">
-        <button id="twitchLoginBtn" class="btn">Login with Twitch</button>
+      <div class="p-8 md:p-12 lg:p-16 bg-gray-900 rounded-2xl shadow-2xl border-2 border-red-500 mt-16 text-center">
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-red-500 mb-4">⛔ Permission Denied</h1>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-8">You must be logged in as an administrator to view this page.</p>
+        <button id="twitchLoginBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition-transform duration-300 hover:scale-105">Login with Twitch</button>
       </div>
     `;
     document.getElementById('twitchLoginBtn')?.addEventListener('click', () => {
@@ -310,48 +315,48 @@ async function renderAdminPanel() {
     return;
   }
   adminMain.innerHTML = `
-    <h1>⚙️ Admin Panel</h1>
+    <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-8 mt-16 text-center">⚙️ Admin Panel</h1>
 
-    <h2>Set Prediction Deadline</h2>
-    <div class="admin-section">
-      <p>Current Deadline: <span id="currentDeadline">Not Set</span></p>
-      <input type="datetime-local" id="setDeadlineInput" class="admin-input">
-      <button id="setDeadlineBtn" class="btn">Set Deadline</button>
+    <div class="bg-gray-900 p-8 rounded-xl shadow-2xl mb-8 border border-gray-700">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">Set Prediction Deadline</h2>
+        <p class="text-gray-400 mb-4">Current Deadline: <span id="currentDeadline" class="font-bold text-white">Not Set</span></p>
+        <input type="datetime-local" id="setDeadlineInput" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+        <button id="setDeadlineBtn" class="w-full mt-4 bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 rounded-lg transition-colors">Set Deadline</button>
     </div>
 
-    <h2>Select Nominations</h2>
-    <div class="contestants-grid" id="admin-contestants"></div>
-    <div class="button-container">
-      <button class="btn" id="save-nominations">💾 Save Nominations</button>
+    <div class="bg-gray-900 p-8 rounded-xl shadow-2xl mb-8 border border-gray-700">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">Select Nominations</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6" id="admin-contestants"></div>
+        <button id="save-nominations" class="w-full mt-8 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">💾 Save Nominations</button>
     </div>
 
-    <h2>Confirm Elimination Winner</h2>
-    <div class="admin-section">
-      <button id="loadNominationsBtn" class="btn">Load Nominated Contestants</button>
-      <div class="contestants-grid" id="admin-winner-selection"></div>
-      <button id="confirmWinnerBtn" class="btn">👑 Confirm Winner</button>
+    <div class="bg-gray-900 p-8 rounded-xl shadow-2xl mb-8 border border-gray-700">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">Confirm Elimination Winner</h2>
+        <button id="loadNominationsBtn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded-lg transition-colors">Load Nominated Contestants</button>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-4" id="admin-winner-selection"></div>
+        <button id="confirmWinnerBtn" class="w-full mt-8 bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 rounded-lg transition-colors">👑 Confirm Winner</button>
     </div>
 
-    <h2>Prediction Management</h2>
-    <div class="button-container">
-      <button id="deletePredictionsBtn" class="btn">🗑️ Delete User Predictions</button>
-      <button id="cancelPredictionBtn" class="btn">❌ Cancel All Predictions</button>
+    <div class="bg-gray-900 p-8 rounded-xl shadow-2xl mb-8 border border-gray-700">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">Prediction Management</h2>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button id="deletePredictionsBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg transition-colors">🗑️ Delete User Predictions</button>
+            <button id="cancelPredictionBtn" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition-colors">❌ Cancel All Predictions</button>
+        </div>
+    </div>
+    
+    <div class="bg-gray-900 p-8 rounded-xl shadow-2xl mb-8 border border-gray-700">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">Manual Score Update</h2>
+        <input type="text" id="playerNameInput" placeholder="Player Name" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 mb-4">
+        <input type="number" id="playerScoreInput" placeholder="Points" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 mb-4">
+        <button id="updateScoreBtn" class="w-full bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 rounded-lg transition-colors">Update Score</button>
     </div>
 
-    <h2>Manual Score Update</h2>
-    <div class="admin-section">
-      <p>Enter a player's name and points to update their score.</p>
-      <input type="text" id="playerNameInput" placeholder="Player Name" class="admin-input">
-      <input type="number" id="playerScoreInput" placeholder="Points" class="admin-input">
-      <button id="updateScoreBtn" class="btn">Update Score</button>
-    </div>
-
-    <h2>Admin Privileges</h2>
-    <div class="admin-section">
-        <p>Enter a Twitch username to grant them admin privileges.</p>
-        <input type="text" id="addAdminInput" placeholder="Twitch Username" class="admin-input">
-        <button id="addAdminBtn" class="btn">Grant Admin Access</button>
-        <p class="mt-2">Current Admins: <span id="currentAdmins"></span></p>
+    <div class="bg-gray-900 p-8 rounded-xl shadow-2xl mb-8 border border-gray-700">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">Admin Privileges</h2>
+        <input type="text" id="addAdminInput" placeholder="Twitch Username" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 mb-4">
+        <button id="addAdminBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">Grant Admin Access</button>
+        <p class="mt-4 text-gray-400">Current Admins: <span id="currentAdmins" class="font-bold text-white"></span></p>
     </div>
   `;
 
@@ -394,7 +399,10 @@ async function renderAdminPanel() {
   ];
   nominationContestants.forEach(name => {
     const card = createContestantCard(name);
-    card.addEventListener("click", () => card.classList.toggle("selected"));
+    card.addEventListener("click", () => {
+        card.classList.toggle("border-green-500");
+        card.classList.toggle("shadow-green-500");
+    });
     adminContainer.appendChild(card);
   });
 
@@ -405,7 +413,7 @@ async function renderAdminPanel() {
       return;
     }
     const selected = [];
-    document.querySelectorAll("#admin-contestants .contestant-card.selected h3").forEach(el => selected.push(el.textContent));
+    document.querySelectorAll("#admin-contestants > div.border-green-500 h3").forEach(el => selected.push(el.textContent));
     localStorage.setItem("nominations", JSON.stringify(selected));
     alert("✅ Nominations saved successfully!");
   });
@@ -416,15 +424,15 @@ async function renderAdminPanel() {
     nominations.forEach(name => {
       const card = createContestantCard(name);
       card.addEventListener("click", () => {
-        document.querySelectorAll("#admin-winner-selection .contestant-card").forEach(c => c.classList.remove("selected"));
-        card.classList.add("selected");
+        document.querySelectorAll("#admin-winner-selection > div").forEach(c => c.classList.remove("border-4", "border-green-500", "shadow-green-500"));
+        card.classList.add("border-4", "border-green-500", "shadow-green-500");
       });
       winnerSelectionContainer.appendChild(card);
     });
   });
 
   confirmWinnerBtn?.addEventListener("click", async () => {
-    const selectedWinner = document.querySelector("#admin-winner-selection .contestant-card.selected h3");
+    const selectedWinner = document.querySelector("#admin-winner-selection > div.border-green-500 h3");
     if (selectedWinner) {
       const winnerName = selectedWinner.textContent;
       localStorage.setItem("winner", winnerName);
@@ -501,29 +509,31 @@ async function renderTopTen() {
   const data = await fetchLeaderboardData();
   const topTen = data.sort((a, b) => b.score - a.score).slice(0, 10);
   if (topTen.length === 0) {
-    topTenContainer.innerHTML = "<h2>No scores to display yet.</h2>";
+    topTenContainer.innerHTML = "<h2 class='text-xl text-gray-400'>No scores to display yet.</h2>";
     return;
   }
   topTenContainer.innerHTML = `
-    <h2>Top 10 Players 🏆</h2>
-    <table class="leaderboard-table">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Player</th>
-          <th>Points</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${topTen.map((p, i) => `
-          <tr>
-            <td>${i + 1}</td>
-            <td>${p.name}</td>
-            <td>${p.score}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
+    <h2 class="text-3xl font-bold text-white mb-6">Top 10 Players 🏆</h2>
+    <div class="bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
+        <table class="min-w-full divide-y divide-gray-700">
+            <thead class="bg-gray-800">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Rank</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Player</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Points</th>
+                </tr>
+            </thead>
+            <tbody class="bg-gray-900 divide-y divide-gray-800">
+                ${topTen.map((p, i) => `
+                    <tr class="even:bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${i + 1}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${p.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-400 font-bold">${p.score}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
   `;
 }
 
