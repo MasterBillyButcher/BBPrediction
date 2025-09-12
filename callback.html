@@ -6,11 +6,23 @@
 </head>
 <body>
   <script>
-    // Twitch OAuth callback handler
-    const hash = window.location.hash.substr(1);
+    const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const token = params.get("access_token");
-    if (token) {
+    
+    // Check for error parameters first
+    const errorParams = new URLSearchParams(window.location.search);
+    const error = errorParams.get("error");
+    const errorDescription = errorParams.get("error_description");
+
+    if (error) {
+        document.body.innerHTML = `
+            <h1 style="color: red;">❌ Twitch Authentication Error</h1>
+            <p><strong>Error:</strong> ${error}</p>
+            <p><strong>Description:</strong> ${errorDescription || "No description provided."}</p>
+            <p>Please check your application settings in the Twitch Developer Console.</p>
+        `;
+    } else if (token) {
       localStorage.setItem("twitch_token", token);
       window.location.href = "index.html";
     } else {
