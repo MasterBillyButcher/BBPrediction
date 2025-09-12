@@ -22,7 +22,7 @@ const contestantData = [
 // === TWITCH AUTH & ADMIN LOGIC ===
 const CLIENT_ID = 'wtecr95tk5eu66xeugoiph13ba69m9';
 // Change this to your Vercel URL when deploying
-const REDIRECT_URI = 'http://127.0.0.1:5500/callback.html'; 
+const REDIRECT_URI = 'https://bb-prediction.vercel.app/callback.html';
 const SCOPES = 'user:read:email';
 const ADMIN_USERNAME = 'bobmasterbillie';
 
