@@ -20,30 +20,35 @@
   <main>
     <h1>⚙️ Admin Panel</h1>
 
-    <h2>Set Prediction Deadline</h2>
-    <div class="admin-controls">
-      <label for="end-date">Date: </label>
-      <input type="date" id="end-date">
-      <label for="end-time">Time: </label>
-      <input type="time" id="end-time">
-    </div>
-
-    <h2>Select Nominees</h2>
+    <h2>Select Nominations</h2>
     <div class="contestants-grid" id="admin-contestants">
       </div>
+    <button class="btn" id="save-nominations">💾 Save Nominations</button>
 
-    <div class="admin-buttons">
-      <button class="btn" id="save-nominations">💾 Save Nominations</button>
-      <button class="btn" id="delete-prediction">🗑️ Delete Prediction</button>
+    <hr style="margin: 40px 0; border: none; border-top: 1px solid #39FF14;">
+
+    <h2>⏱️ Manage Prediction Deadline</h2>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <p>Current Deadline: <span id="currentDeadline">Not Set</span></p>
+      <input type="datetime-local" id="setDeadlineInput" style="padding: 10px; font-size: 1rem; border: 1px solid #39FF14; background: #1a1a1f; color: #fff;">
+      <button class="btn" id="setDeadlineBtn" style="margin-left: 10px;">Set Deadline</button>
     </div>
 
-    <hr>
+    <hr style="margin: 40px 0; border: none; border-top: 1px solid #39FF14;">
 
-    <h2>Set Correct Elimination</h2>
-    <p>This can only be done after the prediction deadline has passed.</p>
-    <button class="btn" id="load-nominees">📋 Load Nominees</button>
-    <div class="contestants-grid" id="correct-answer-options">
+    <h2>✅ Select Correct Answer</h2>
+    <button class="btn" id="loadNominationsBtn">Load Nominations</button>
+    <div class="contestants-grid" id="admin-winner-selection" style="margin-top: 20px;">
       </div>
+    <button class="btn" id="confirmWinnerBtn">👑 Confirm Winner</button>
+    
+    <hr style="margin: 40px 0; border: none; border-top: 1px solid #39FF14;">
+
+    <h2>🗑️ Delete Predictions</h2>
+    <div style="text-align:center;">
+      <button class="btn" id="deletePredictionsBtn" style="background-color: #ff3914; border-color: #ff3914;">Delete All Predictions</button>
+    </div>
+
   </main>
 </body>
 </html>
