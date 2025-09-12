@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Leaderboard</title>
 <link rel="stylesheet" href="style.css">
+<style>
+.center-screen{display:flex; flex-direction:column; align-items:center; padding-top:120px;}
+table{border-collapse:collapse;width:80%; background:#1E1E1E; color:#39FF14;}
+th,td{padding:12px;text-align:center;border:1px solid #39FF14;}
+th{background:#121212;}
+</style>
 </head>
 <body>
 <div class="navbar">
@@ -17,23 +23,37 @@
 
 <section class="center-screen">
 <h2>Leaderboard 🏆</h2>
-<table id="leaderboardTable">
-  <tr><th>Rank</th><th>User</th><th>Points</th></tr>
+<table>
+<thead>
+<tr><th>Rank</th><th>User</th><th>Points</th></tr>
+</thead>
+<tbody id="leaderboardBody"></tbody>
 </table>
-</section>
 
 <script>
-const users=JSON.parse(localStorage.getItem('userPredictions')||'[]');
+const user=JSON.parse(localStorage.getItem('twitchUser')||'null');
+const adminUsers=["bobmasterbillie","beaststatsofficial","timepasstime"];
+if(user && adminUsers.includes(user.username.toLowerCase())) document.getElementById('adminLink').style.display='block';
+
+const predictions=JSON.parse(localStorage.getItem('userPredictions')||'{}');
+const current=JSON.parse(localStorage.getItem('currentPrediction')||'{}');
 const leaderboard={};
-users.forEach(u=>{leaderboard[u.user]=(leaderboard[u.user]||0)+1});
+
+for(const [username,pred] of Object.entries(predictions)){
+  leaderboard[username]=0;
+  if(current.result && pred===current.result) leaderboard[username]+=1;
+}
+
 const sorted=Object.entries(leaderboard).sort((a,b)=>b[1]-a[1]);
-const table=document.getElementById('leaderboardTable');
-sorted.forEach(([user,points],i)=>{
-  const row=table.insertRow();
-  row.insertCell(0).innerText=i+1;
-  row.insertCell(1).innerText=user;
-  row.insertCell(2).innerText=points;
+const tbody=document.getElementById('leaderboardBody');
+let rank=1;
+sorted.forEach(([user,points])=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${rank}</td><td>${user}</td><td>${points}</td>`;
+  tbody.appendChild(tr);
+  rank++;
 });
 </script>
+</section>
 </body>
 </html>
