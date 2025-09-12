@@ -435,4 +435,5 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (path.includes('leaderboard.html')) {
     renderLeaderboard();
   }
+
 });
