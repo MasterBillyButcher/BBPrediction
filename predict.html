@@ -15,98 +15,73 @@
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
 
-<section class="center-screen" id="predictSection">
-  <h2>Make Your Predictions 🔮</h2>
-  <p>Click a contestant or special option, then confirm.</p>
-  <div class="grid-container" id="predictionGrid"></div>
-  <button id="confirmBtn" disabled>Confirm Prediction</button>
-  <div id="countdown" style="margin-top:20px;font-size:18px;"></div>
-</section>
+<section class="center-screen">
+<h2>Make Your Prediction 🔮</h2>
+<div id="countdown" style="margin:10px 0;font-size:18px;"></div>
+
+<div class="grid-container" id="predictGrid"></div>
+<button id="confirmBtn">Confirm Prediction</button>
+
+<h3>Previous Predictions</h3>
+<div id="oldPredictions"></div>
 
 <script>
-// Token & admin
-const CLIENT_ID='wtecr95tk5eu66xeugoiph13ba69m9';
-const adminNames=['bobmasterbillie'];
-let token=localStorage.getItem('twitch_token');
+let user={username:"MasterBillie"}; // Replace with actual Twitch OAuth
+if(localStorage.getItem('currentPrediction')) document.getElementById('confirmBtn').disabled=false;
 
-// Admin link visibility
-if(token){
-  fetch('https://api.twitch.tv/helix/users',{
-    headers:{'Authorization':'Bearer '+token,'Client-Id': CLIENT_ID}
-  }).then(res=>res.json()).then(data=>{
-    const user=data.data[0];
-    if(adminNames.includes(user.display_name)) document.getElementById('adminLink').style.display='inline-block';
-  });
-}
+const adminUsers=["bobmasterbillie"];
+if(adminUsers.includes(user.username.toLowerCase())) document.getElementById('adminLink').style.display='block';
 
-// Contestants + special options
-const contestants=[
-  "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
-  "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirjkar",
-  "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
-  "Tanya Mittal","Zeishan Quadri","No Elimination","Double Elimination"
-];
+const currentPrediction=JSON.parse(localStorage.getItem('currentPrediction')||'{}');
+const nominations=currentPrediction.nominations||[];
+const endTime=currentPrediction.endTime?new Date(currentPrediction.endTime):null;
 
-let selectedPrediction=null;
-const grid=document.getElementById('predictionGrid');
-const confirmBtn=document.getElementById('confirmBtn');
+const predictGrid=document.getElementById('predictGrid');
+nominations.forEach(name=>{
+  const div=document.createElement('div');
+  div.classList.add('card');
+  div.innerHTML=`<img src="Contestant/${name}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
+  div.onclick=()=>{
+    predictGrid.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+    div.classList.add('selected');
+  };
+  predictGrid.appendChild(div);
+});
 
-function loadPredictionGrid(){
-  grid.innerHTML='';
-  const current=JSON.parse(localStorage.getItem('currentPrediction')||'{}');
-  const now=new Date().getTime();
-  let ended=true;
-  if(current.endTime && new Date(current.endTime).getTime()>now) ended=false;
-
-  contestants.forEach(name=>{
-    const div=document.createElement('div');
-    div.classList.add('card');
-    div.innerHTML=`<img src="Contestant/${name}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
-    if(!ended){
-      div.onclick=()=>{
-        grid.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
-        div.classList.add('selected');
-        selectedPrediction=name;
-        confirmBtn.disabled=false;
-      };
-    }
-    if(ended) div.style.opacity=0.6;
-    grid.appendChild(div);
-  });
-
-  if(!ended) startCountdown(new Date(current.endTime).getTime());
-  else{confirmBtn.disabled=true; document.getElementById('countdown').innerText="Prediction ended. You can view previous predictions.";}
-}
-
-confirmBtn.onclick=()=>{
-  if(!selectedPrediction) return;
-  let userPredictions=JSON.parse(localStorage.getItem('userPredictions')||'[]');
-  userPredictions.push({user:localStorage.getItem('twitch_username')||'guest',prediction:selectedPrediction,time:new Date().toISOString()});
-  localStorage.setItem('userPredictions',JSON.stringify(userPredictions));
-  alert('Prediction confirmed: '+selectedPrediction);
-  confirmBtn.disabled=true;
-  grid.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+document.getElementById('confirmBtn').onclick=()=>{
+  const selected=predictGrid.querySelector('.card.selected');
+  if(!selected){alert('Select one contestant or option!'); return;}
+  let saved=JSON.parse(localStorage.getItem('userPredictions')||'[]');
+  saved.push({user:user.username,prediction:selected.querySelector('h3').innerText});
+  localStorage.setItem('userPredictions',JSON.stringify(saved));
+  alert('Prediction saved: '+selected.querySelector('h3').innerText);
 };
 
-function startCountdown(endTime){
-  const cd=document.getElementById('countdown');
-  const interval=setInterval(()=>{
-    const now=new Date().getTime();
-    const distance=endTime-now;
-    if(distance<0){
-      clearInterval(interval);
-      cd.innerText="Prediction period has ended.";
-      confirmBtn.disabled=true;
-    }else{
-      const h=Math.floor((distance%(1000*60*60*24))/(1000*60*60));
-      const m=Math.floor((distance%(1000*60*60))/(1000*60));
-      const s=Math.floor((distance%(1000*60))/1000);
-      cd.innerText=`Prediction ends in ${h}h ${m}m ${s}s`;
+// Countdown Timer
+if(endTime){
+  const countdownEl=document.getElementById('countdown');
+  const timer=setInterval(()=>{
+    const now=new Date();
+    const diff=endTime-now;
+    if(diff<=0){countdownEl.innerText='Prediction ended'; document.getElementById('confirmBtn').disabled=true; clearInterval(timer);}
+    else{
+      const h=Math.floor(diff/1000/3600);
+      const m=Math.floor(diff/1000/60)%60;
+      const s=Math.floor(diff/1000)%60;
+      countdownEl.innerText=`Prediction ends in ${h}h ${m}m ${s}s`;
     }
   },1000);
 }
 
-loadPredictionGrid();
+// Show old predictions
+const oldPreds=JSON.parse(localStorage.getItem('userPredictions')||'[]');
+const oldDiv=document.getElementById('oldPredictions');
+oldPreds.forEach(p=>{
+  const div=document.createElement('div');
+  div.innerText=`${p.user} → ${p.prediction}`;
+  oldDiv.appendChild(div);
+});
 </script>
+</section>
 </body>
 </html>
