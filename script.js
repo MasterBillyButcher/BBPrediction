@@ -19,55 +19,111 @@ const contestantData = [
   { name: "Zeishan Quadri", instagram: "zeishanquadri83" }
 ];
 
-// === GENERAL FUNCTIONS ===
-function createContestantCard(name) {
-  const card = document.createElement("div");
-  card.className = "contestant-card";
+// === TWITCH AUTH & ADMIN LOGIC ===
+const CLIENT_ID = 'wtecr95tk5eu66xeugoiph13ba69m9';
+const REDIRECT_URI = 'http://127.0.0.1:5500/callback.html'; // Update this to your deployed URL
+const SCOPES = 'user:read:email';
+const ADMIN_USERNAME = 'bobmasterbillie';
 
-  let imgSrc = "";
-  if (name === "No Elimination") {
-    imgSrc = "Contestant/No Elimination.jpg";
-  } else if (name === "Double Elimination") {
-    imgSrc = "Contestant/Double Elimination.jpg";
-  } else {
-    imgSrc = "Contestant/" + name + ".jpg";
+// Handles Twitch login button click
+document.getElementById('twitchLoginBtn')?.addEventListener('click', () => {
+  window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=${SCOPES}`;
+});
+
+async function fetchTwitchUser() {
+  const token = localStorage.getItem('twitch_token');
+  if (!token) return null;
+  try {
+    const response = await fetch('https://api.twitch.tv/helix/users', {
+      headers: {
+        'Client-ID': CLIENT_ID,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (!response.ok) throw new Error('Failed to fetch user');
+    const data = await response.json();
+    const username = data.data[0].login;
+    localStorage.setItem('twitch_username', username);
+    return username;
+  } catch (error) {
+    console.error("Twitch auth error:", error);
+    localStorage.removeItem('twitch_token');
+    localStorage.removeItem('twitch_username');
+    return null;
   }
-
-  card.innerHTML = `
-    <img src="${imgSrc}" alt="${name}">
-    <h3>${name}</h3>
-  `;
-  return card;
 }
 
-// === ADMIN PANEL LOGIC ===
-const adminContainer = document.getElementById("admin-contestants");
-const saveBtn = document.getElementById("save-nominations");
+async function renderAdminPanel() {
+  const adminMain = document.getElementById('admin-main');
+  if (!adminMain) return;
 
-const loadNominationsBtn = document.getElementById("loadNominationsBtn");
-const winnerSelectionContainer = document.getElementById("admin-winner-selection");
-const confirmWinnerBtn = document.getElementById("confirmWinnerBtn");
+  const username = await fetchTwitchUser();
+  if (username !== ADMIN_USERNAME) {
+    adminMain.innerHTML = `
+      <h1 style="color: red; text-align: center;">⛔ Permission Denied</h1>
+      <p style="text-align: center;">You must be logged in as an administrator to view this page.</p>
+      <div class="button-container">
+        <button id="twitchLoginBtn" class="btn">Login with Twitch</button>
+      </div>
+    `;
+    document.getElementById('twitchLoginBtn')?.addEventListener('click', () => {
+      window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=${SCOPES}`;
+    });
+    return;
+  }
 
-const setDeadlineInput = document.getElementById("setDeadlineInput");
-const setDeadlineBtn = document.getElementById("setDeadlineBtn");
-const currentDeadlineEl = document.getElementById("currentDeadline");
+  adminMain.innerHTML = `
+    <h1>⚙️ Admin Panel</h1>
 
-const deletePredictionsBtn = document.getElementById("deletePredictionsBtn");
+    <h2>Set Prediction Deadline</h2>
+    <div class="admin-section">
+      <p>Current Deadline: <span id="currentDeadline">Not Set</span></p>
+      <input type="datetime-local" id="setDeadlineInput" class="admin-input">
+      <button id="setDeadlineBtn" class="btn">Set Deadline</button>
+    </div>
 
-if (adminContainer) {
+    <h2>Select Nominations</h2>
+    <div class="contestants-grid" id="admin-contestants"></div>
+    <div class="button-container">
+      <button class="btn" id="save-nominations">💾 Save Nominations</button>
+    </div>
+
+    <h2>Confirm Elimination Winner</h2>
+    <div class="admin-section">
+      <button id="loadNominationsBtn" class="btn">Load Nominated Contestants</button>
+      <div class="contestants-grid" id="admin-winner-selection"></div>
+      <button id="confirmWinnerBtn" class="btn">👑 Confirm Winner</button>
+    </div>
+
+    <h2>Prediction Management</h2>
+    <div class="button-container">
+      <button id="deletePredictionsBtn" class="btn">🗑️ Delete User Predictions</button>
+      <button id="cancelPredictionBtn" class="btn">❌ Cancel All Predictions</button>
+    </div>
+  `;
+
+  // All event listeners for admin panel
+  const adminContainer = document.getElementById("admin-contestants");
+  const saveBtn = document.getElementById("save-nominations");
+  const loadNominationsBtn = document.getElementById("loadNominationsBtn");
+  const winnerSelectionContainer = document.getElementById("admin-winner-selection");
+  const confirmWinnerBtn = document.getElementById("confirmWinnerBtn");
+  const setDeadlineInput = document.getElementById("setDeadlineInput");
+  const setDeadlineBtn = document.getElementById("setDeadlineBtn");
+  const currentDeadlineEl = document.getElementById("currentDeadline");
+  const deletePredictionsBtn = document.getElementById("deletePredictionsBtn");
+  const cancelPredictionBtn = document.getElementById("cancelPredictionBtn");
+
+  // Nomination Logic
   const nominationContestants = [
-    "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar",
-    "Baseer Ali","Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand",
-    "Mridul Tiwari","Nagma Mirajkar","Natalia Janoszek","Neelam Giri",
-    "Nehal Chudasama","Pranit More","Shehbaz Badesha","Tanya Mittal","Zeishan Quadri",
-    "No Elimination", "Double Elimination"
+    ...contestantData.map(c => c.name),
+    "No Elimination",
+    "Double Elimination"
   ];
 
   nominationContestants.forEach(name => {
     const card = createContestantCard(name);
-    card.addEventListener("click", () => {
-      card.classList.toggle("selected");
-    });
+    card.addEventListener("click", () => card.classList.toggle("selected"));
     adminContainer.appendChild(card);
   });
 
@@ -77,7 +133,6 @@ if (adminContainer) {
       alert("⚠️ Please set a prediction deadline before saving nominations!");
       return;
     }
-
     const selected = [];
     document.querySelectorAll("#admin-contestants .contestant-card.selected h3").forEach(el => selected.push(el.textContent));
     localStorage.setItem("nominations", JSON.stringify(selected));
@@ -86,7 +141,7 @@ if (adminContainer) {
 
   // Load Nominations for Winner Selection
   loadNominationsBtn?.addEventListener("click", () => {
-    winnerSelectionContainer.innerHTML = ""; // Clear existing cards
+    winnerSelectionContainer.innerHTML = "";
     const nominations = JSON.parse(localStorage.getItem("nominations")) || [];
     nominations.forEach(name => {
       const card = createContestantCard(name);
@@ -98,6 +153,7 @@ if (adminContainer) {
     });
   });
 
+  // Confirm Winner
   confirmWinnerBtn?.addEventListener("click", () => {
     const selectedWinner = document.querySelector("#admin-winner-selection .contestant-card.selected h3");
     if (selectedWinner) {
@@ -108,7 +164,7 @@ if (adminContainer) {
     }
   });
 
-  // Deadline Management Logic
+  // Deadline Management
   const storedDeadline = localStorage.getItem("deadline");
   if (storedDeadline) {
     currentDeadlineEl.textContent = new Date(parseInt(storedDeadline)).toLocaleString();
@@ -125,14 +181,49 @@ if (adminContainer) {
     }
   });
 
-  // Delete Predictions Logic
+  // Delete & Cancel Predictions
   deletePredictionsBtn?.addEventListener("click", () => {
-    localStorage.removeItem("final_prediction");
-    alert("🗑️ User predictions have been deleted!");
+    if (confirm("Are you sure you want to delete all user predictions? This cannot be undone.")) {
+      localStorage.removeItem("userPrediction");
+      alert("🗑️ User predictions have been deleted!");
+      window.location.reload();
+    }
+  });
+
+  cancelPredictionBtn?.addEventListener("click", () => {
+    if (confirm("Are you sure you want to cancel the current prediction round? This will clear everything!")) {
+      localStorage.removeItem("nominations");
+      localStorage.removeItem("userPrediction");
+      localStorage.removeItem("winner");
+      localStorage.removeItem("deadline");
+      alert("💥 Prediction round has been canceled!");
+      window.location.reload();
+    }
   });
 }
 
-// === PREDICTION PAGE LOGIC ===
+// === GENERAL FUNCTIONS & PAGE LOGIC ===
+function createContestantCard(name) {
+  const card = document.createElement("div");
+  card.className = "contestant-card";
+
+  let imgSrc = "";
+  if (name === "No Elimination") {
+    imgSrc = "Contestant/No Elimination.jpg";
+  } else if (name === "Double Elimination") {
+    imgSrc = "Contestant/Double Elimination.jpg";
+  } else {
+    imgSrc = `Contestant/${name}.jpg`;
+  }
+
+  card.innerHTML = `
+    <img src="${imgSrc}" alt="${name}">
+    <h3>${name}</h3>
+  `;
+  return card;
+}
+
+// Prediction Page Logic
 const predictContainer = document.getElementById("prediction-options");
 const submitPredictionBtn = document.getElementById("submitPrediction");
 
@@ -147,13 +238,11 @@ if (predictContainer) {
       const card = createContestantCard(name);
       predictContainer.appendChild(card);
 
-      // Check if user has already voted
       if (userPrediction) {
         if (name === userPrediction) {
           card.classList.add("predicted-card");
         }
       } else {
-        // Add click listener only if user hasn't voted
         card.addEventListener("click", () => {
           document.querySelectorAll(".contestant-card").forEach(c => c.classList.remove("selected"));
           card.classList.add("selected");
@@ -161,7 +250,6 @@ if (predictContainer) {
       }
     });
 
-    // Handle submit button state
     if (userPrediction) {
       submitPredictionBtn.disabled = true;
       submitPredictionBtn.textContent = "Prediction Submitted ✅";
@@ -171,21 +259,19 @@ if (predictContainer) {
         if (selectedPrediction) {
           localStorage.setItem("userPrediction", selectedPrediction.textContent);
           alert("Prediction submitted! Thanks for participating! 🎉");
-          // Reload page to update UI
           window.location.reload();
         } else {
           alert("Please select a contestant before submitting your prediction.");
         }
       });
     }
-
   } else {
     predictContainer.innerHTML = "<p>Prediction submissions are currently closed.</p>";
     submitPredictionBtn.disabled = true;
   }
 }
 
-// === CONTESTANTS PAGE LOGIC ===
+// Contestants Page Logic
 const contestantsList = document.getElementById("contestants-list");
 if (contestantsList) {
   contestantData.forEach(contestant => {
@@ -202,7 +288,7 @@ if (contestantsList) {
   });
 }
 
-// === COUNTDOWN ===
+// Countdown
 const countdownEl = document.getElementById("countdown");
 if (countdownEl) {
   function updateCountdown() {
@@ -227,7 +313,7 @@ if (countdownEl) {
   setInterval(updateCountdown, 1000);
 }
 
-// === LEADERBOARD ===
+// Leaderboard
 const leaderboardBody = document.getElementById("leaderboardBody");
 if (leaderboardBody) renderLeaderboard();
 
@@ -258,3 +344,8 @@ const leaderboardData = [
   { name: "Charlie", points: 180 }, { name: "David", points: 90 },
   { name: "Eve", points: 200 }, { name: "Frank", points: 110 }
 ];
+
+// Initial render for admin panel
+document.addEventListener('DOMContentLoaded', () => {
+  renderAdminPanel();
+});
