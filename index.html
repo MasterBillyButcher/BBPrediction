@@ -5,6 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bigg Boss 19 | Home</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  body {
+    background-color: #121212;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    margin:0; padding:0;
+  }
+  .navbar {
+    display:flex; justify-content:center; gap:2rem;
+    background:#1E1E1E; padding:1rem; position:fixed; width:100%; top:0; z-index:1000;
+  }
+  .navbar a {color:#39FF14; text-decoration:none; font-weight:bold;}
+  .center-screen {display:flex; flex-direction:column; align-items:center; justify-content:center; padding-top:120px;}
+  button {padding:0.7rem 1.5rem; background:#39FF14; border:none; border-radius:10px; font-weight:bold; cursor:pointer; transition:0.3s;}
+  button:hover {box-shadow:0 0 15px #39FF14; transform:translateY(-3px);}
+  .admin-section {margin-top:30px; padding:1rem; background:#1E1E1E; border-radius:12px; box-shadow:0 0 10px rgba(57,255,20,0.3);}
+  input {padding:0.5rem; border-radius:8px; border:none; margin-right:10px;}
+</style>
 </head>
 <body>
 <div class="navbar">
@@ -15,59 +33,76 @@
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
 
-<section class="center-screen" id="homeSection">
-<h2>Welcome to Bigg Boss 19 Prediction Game</h2>
+<section class="center-screen">
+<h2>Bigg Boss 19 Prediction Game</h2>
+
 <div id="loginDiv">
   <button id="loginBtn">Login with Twitch</button>
 </div>
 
-<div id="userDiv" style="display:none;">
-  <img id="userAvatar" src="" width="100" height="100" style="border-radius:50%;">
+<div id="userDiv" style="display:none; flex-direction:column; align-items:center;">
+  <img id="userAvatar" src="" width="100" height="100" style="border-radius:50%; margin-bottom:10px;">
   <h3 id="username"></h3>
-  <h4>Mark your favorite contestant:</h4>
-  <div class="grid-container" id="favGrid"></div>
-  <button id="saveFav">Save Favorite</button>
+  <button id="logoutBtn" style="margin-top:10px;">Logout</button>
+
+  <div class="admin-section" id="adminSection" style="display:none;">
+    <h4>Assign Admin Power ⚙️</h4>
+    <input type="text" id="newAdmin" placeholder="Enter Twitch Username">
+    <button id="addAdminBtn">Give Admin</button>
+    <p id="adminMsg"></p>
+  </div>
 </div>
 </section>
 
 <script>
-// Sample Twitch login simulation (replace with real OAuth)
-const adminUsers=["bobmasterbillie"];
-let user={username:"MasterBillie",avatar:"https://static-cdn.jtvnw.net/jtv_user_pictures/6edb3d3e-profile_image-300x300.png"};
+// Demo user session (replace with OAuth in production)
+let user=null; 
+let adminUsers=["bobmasterbillie","beaststatsofficial","timepasstime"];
+const loginBtn=document.getElementById('loginBtn');
+const logoutBtn=document.getElementById('logoutBtn');
+const userDiv=document.getElementById('userDiv');
+const loginDiv=document.getElementById('loginDiv');
+const adminSection=document.getElementById('adminSection');
+const adminLink=document.getElementById('adminLink');
 
-document.getElementById('loginBtn').onclick=()=>{
-  document.getElementById('loginDiv').style.display='none';
+loginBtn.onclick=()=>{
+  // Simulate OAuth login (replace with Twitch OAuth)
+  user={username:"MasterBillie",avatar:"https://static-cdn.jtvnw.net/jtv_user_pictures/6edb3d3e-profile_image-300x300.png"};
+  loginDiv.style.display='none';
   showUser();
 };
 
+logoutBtn.onclick=()=>{
+  user=null;
+  loginDiv.style.display='block';
+  userDiv.style.display='none';
+  adminLink.style.display='none';
+};
+
 function showUser(){
-  document.getElementById('userDiv').style.display='flex';
+  if(!user) return;
+  userDiv.style.display='flex';
   document.getElementById('username').innerText=user.username;
   document.getElementById('userAvatar').src=user.avatar;
-  if(adminUsers.includes(user.username.toLowerCase())) document.getElementById('adminLink').style.display='block';
 
-  // Favorite contestants
-  const favContestants=[
-    "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
-    "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
-    "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
-    "Tanya Mittal","Zeishan Quadri"
-  ];
-  const grid=document.getElementById('favGrid');
-  favContestants.forEach(name=>{
-    const div=document.createElement('div');
-    div.classList.add('card');
-    div.innerHTML=`<img src="Contestant/${name}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
-    div.onclick=()=>div.classList.toggle('selected');
-    grid.appendChild(div);
-  });
-
-  document.getElementById('saveFav').onclick=()=>{
-    const favs=[...grid.querySelectorAll('.card.selected')].map(c=>c.querySelector('h3').innerText);
-    localStorage.setItem('favContestants',JSON.stringify(favs));
-    alert('Favorite contestants saved: '+favs.join(', '));
-  };
+  if(adminUsers.includes(user.username.toLowerCase())){
+    adminLink.style.display='block';
+    adminSection.style.display='block';
+  }
 }
+
+// Admin Assign Feature
+document.getElementById('addAdminBtn').onclick=()=>{
+  const newAdmin=document.getElementById('newAdmin').value.trim().toLowerCase();
+  if(newAdmin && !adminUsers.includes(newAdmin)){
+    adminUsers.push(newAdmin);
+    document.getElementById('adminMsg').innerText=`${newAdmin} is now an admin!`;
+    document.getElementById('newAdmin').value='';
+    alert(`${newAdmin} granted admin power!`);
+  } else {
+    document.getElementById('adminMsg').innerText='Invalid username or already admin.';
+  }
+};
 </script>
 </body>
 </html>
