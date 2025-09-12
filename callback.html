@@ -2,21 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Callback | Twitch OAuth</title>
+<title>Callback</title>
 </head>
 <body>
 <script>
-// Parse access token from URL
-const hash=window.location.hash.substr(1);
-const params=new URLSearchParams(hash);
-const accessToken=params.get('access_token');
-const userName=params.get('user_name'); // Optional if you get username
-if(accessToken){
-  localStorage.setItem('twitch_user','bobmasterbillie'); // For now using bobmasterbillie
-  window.location='index.html';
-}else{
-  alert('Login failed');
-  window.location='index.html';
+window.onload=()=>{
+  const hash=window.location.hash;
+  if(hash){
+    const params=new URLSearchParams(hash.replace('#','?'));
+    const token=params.get('access_token');
+    if(token){
+      localStorage.setItem('twitch_token',token);
+      window.location.href='index.html';
+    }else{
+      alert('Login failed');
+      window.location.href='index.html';
+    }
+  }else{
+    window.location.href='index.html';
+  }
 }
 </script>
 </body>

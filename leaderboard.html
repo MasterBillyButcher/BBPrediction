@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leaderboard | Bigg Boss 19</title>
+<title>Leaderboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,24 +17,22 @@
 
 <section class="center-screen">
 <h2>Leaderboard 🏆</h2>
-<table border="1" style="width:80%;margin:0 auto;border-collapse:collapse;text-align:center;">
-<tr><th>Rank</th><th>User</th><th>Points</th></tr>
-<tbody id="leaderboardBody"></tbody>
+<table id="leaderboardTable">
+  <tr><th>Rank</th><th>User</th><th>Points</th></tr>
 </table>
 </section>
 
 <script>
-let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [
-  {user:'bobmasterbillie',points:5},
-  {user:'player1',points:3},
-  {user:'player2',points:1}
-];
-const tbody = document.getElementById('leaderboardBody');
-leaderboard.sort((a,b)=>b.points-a.points);
-leaderboard.forEach((l,i)=>{
-  const tr = document.createElement('tr');
-  tr.innerHTML=`<td>${i+1}</td><td>${l.user}</td><td>${l.points}</td>`;
-  tbody.appendChild(tr);
+const users=JSON.parse(localStorage.getItem('userPredictions')||'[]');
+const leaderboard={};
+users.forEach(u=>{leaderboard[u.user]=(leaderboard[u.user]||0)+1});
+const sorted=Object.entries(leaderboard).sort((a,b)=>b[1]-a[1]);
+const table=document.getElementById('leaderboardTable');
+sorted.forEach(([user,points],i)=>{
+  const row=table.insertRow();
+  row.insertCell(0).innerText=i+1;
+  row.insertCell(1).innerText=user;
+  row.insertCell(2).innerText=points;
 });
 </script>
 </body>

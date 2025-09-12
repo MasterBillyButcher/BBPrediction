@@ -16,102 +16,55 @@
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 </div>
 
-<section class="center-screen" id="loginSection">
-  <h1>Bigg Boss 19 Prediction Game</h1>
-  <p>Login with Twitch to predict and mark your favorite contestants.</p>
-  <button id="loginBtn">Login with Twitch</button>
-</section>
-
-<section class="center-screen" id="userSection" style="display:none;">
-  <h2>Welcome, <span id="username"></span>!</h2>
-  <img id="profilePic" src="" alt="Profile Picture" style="border-radius:50%;width:120px;height:120px;">
-  <h3>Mark your favorite contestants 👇</h3>
-  <div class="grid-container" id="favoritesGrid"></div>
-  <button onclick="saveFavorites()">Save Favorites</button>
+<section class="home-screen">
+  <h1>Welcome to Bigg Boss 19 Prediction Game</h1>
+  <p>Predict the weekly nominations and earn points!</p>
+  <ul>
+    <li>Login with Twitch to participate.</li>
+    <li>Select contestants or special options each week.</li>
+    <li>Points are awarded for correct predictions.</li>
+    <li>Leaderboard updates in real-time.</li>
+    <li>Admins can nominate contestants, set end time, and publish results.</li>
+  </ul>
+  <div id="loginContainer">
+    <button id="loginBtn" onclick="loginWithTwitch()">Login with Twitch</button>
+    <img id="twitchAvatar" src="" style="width:50px;height:50px;border-radius:50%;display:none;">
+    <span id="twitchUser"></span>
+  </div>
 </section>
 
 <script>
-const CLIENT_ID = 'wtecr95tk5eu66xeugoiph13ba69m9';
-const REDIRECT_URI = window.location.origin + '/index.html';
+const CLIENT_ID='wtecr95tk5eu66xeugoiph13ba69m9';
+const adminNames=['bobmasterbillie'];
 
-// Login button
-document.getElementById('loginBtn').onclick = () => {
-  window.location = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=user:read:email`;
-};
-
-// Handle Twitch OAuth redirect
-let token = localStorage.getItem('twitch_token');
-if(window.location.hash){
-  const hash = window.location.hash.substring(1);
-  const params = new URLSearchParams(hash);
-  if(params.has('access_token')){
-    token = params.get('access_token');
-    localStorage.setItem('twitch_token', token);
-    window.location.hash = '';
+async function checkTwitchLogin(){
+  const token=localStorage.getItem('twitch_token');
+  if(token){
+    try{
+      const res = await fetch('https://api.twitch.tv/helix/users',{
+        headers:{'Authorization':'Bearer '+token,'Client-Id': CLIENT_ID}
+      });
+      const data = await res.json();
+      if(data.data && data.data.length>0){
+        const user=data.data[0];
+        document.getElementById('twitchUser').innerText=user.display_name;
+        document.getElementById('twitchAvatar').src=user.profile_image_url;
+        document.getElementById('twitchAvatar').style.display='inline-block';
+        document.getElementById('loginBtn').style.display='none';
+        if(adminNames.includes(user.display_name)) document.getElementById('adminLink').style.display='inline-block';
+      }else{
+        localStorage.removeItem('twitch_token');
+      }
+    }catch(err){console.error(err);localStorage.removeItem('twitch_token');}
   }
 }
 
-// Show user section if logged in
-if(token){
-  fetch('https://api.twitch.tv/helix/users', {
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Client-Id': CLIENT_ID
-    }
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    const user = data.data[0];
-    document.getElementById('username').innerText = user.display_name;
-    document.getElementById('profilePic').src = user.profile_image_url;
-
-    document.getElementById('loginSection').style.display='none';
-    document.getElementById('userSection').style.display='block';
-
-    // Show admin link if user is admin
-    if(['bobmasterbillie'].includes(user.display_name)) {
-      document.getElementById('adminLink').style.display='inline-block';
-    }
-
-    loadFavorites();
-  })
-  .catch(err=>{
-    console.error('Twitch API error', err);
-    document.getElementById('loginSection').style.display='block';
-    document.getElementById('userSection').style.display='none';
-  });
-}else{
-  document.getElementById('loginSection').style.display='block';
-  document.getElementById('userSection').style.display='none';
+function loginWithTwitch(){
+  const redirect = encodeURIComponent('https://bb-prediction.vercel.app/callback.html');
+  window.location.href=`https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirect}&response_type=token&scope=user:read:email`;
 }
 
-// Favorite contestants
-const contestants = [
-  "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
-  "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
-  "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
-  "Tanya Mittal","Zeishan Quadri"
-];
-
-function loadFavorites(){
-  const favGrid = document.getElementById('favoritesGrid');
-  favGrid.innerHTML = '';
-  const savedFavs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  contestants.forEach(name=>{
-    const div = document.createElement('div');
-    div.classList.add('card');
-    div.innerHTML = `<img src="Contestant/${name}.jpg" onerror="this.src='https://via.placeholder.com/200x250?text=${name}'"><h3>${name}</h3>`;
-    div.onclick = ()=> div.classList.toggle('selected');
-    if(savedFavs.includes(name)) div.classList.add('selected');
-    favGrid.appendChild(div);
-  });
-}
-
-function saveFavorites(){
-  const favs = Array.from(document.querySelectorAll('#favoritesGrid .card.selected')).map(c=>c.querySelector('h3').innerText);
-  localStorage.setItem('favorites', JSON.stringify(favs));
-  alert('Your favorite contestants saved: ' + favs.join(', '));
-}
+checkTwitchLogin();
 </script>
 </body>
 </html>
