@@ -5,8 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bigg Boss 19 | Predict</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  body {background:#121212;color:#fff;font-family:'Roboto',sans-serif;margin:0;padding:0;}
+  .navbar {display:flex; justify-content:center; gap:2rem; background:#1E1E1E; padding:1rem; position:fixed;width:100%; top:0; z-index:1000;}
+  .navbar a {color:#39FF14; text-decoration:none; font-weight:bold;}
+  .center-screen {display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:120px;}
+  #countdown {margin:10px 0;font-size:18px;}
+  .grid-container {display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1.5rem; width:90%; margin-top:20px;}
+  .card {background:#1E1E1E; border-radius:12px; overflow:hidden; text-align:center; box-shadow:0 0 10px rgba(57,255,20,0.3); cursor:pointer; transition:0.3s;}
+  .card:hover {transform:translateY(-5px); box-shadow:0 0 20px rgba(57,255,20,0.6);}
+  .card.selected {border:3px solid #39FF14;}
+  .card img {width:100%; height:250px; object-fit:contain; background:#000;}
+  .card h3 {margin:0.5rem 0; color:#39FF14; font-family:'Montserrat',sans-serif;}
+  #confirmBtn {margin-top:20px;padding:10px 20px;font-size:1rem;background:#39FF14;border:none;border-radius:12px;cursor:pointer;transition:0.3s;}
+  #confirmBtn:hover{box-shadow:0 0 15px #39FF14; transform:translateY(-3px);}
+  #oldPredictions {margin-top:20px; width:90%;}
+  #oldPredictions div {padding:5px; border-bottom:1px solid #39FF14;}
+</style>
 </head>
 <body>
+
 <div class="navbar">
   <a href="index.html">Home</a>
   <a href="predict.html">Predict</a>
@@ -17,7 +35,7 @@
 
 <section class="center-screen">
 <h2>Make Your Prediction 🔮</h2>
-<div id="countdown" style="margin:10px 0;font-size:18px;"></div>
+<div id="countdown"></div>
 
 <div class="grid-container" id="predictGrid"></div>
 <button id="confirmBtn">Confirm Prediction</button>
@@ -26,14 +44,19 @@
 <div id="oldPredictions"></div>
 
 <script>
-let user={username:"MasterBillie"}; // Replace with actual Twitch OAuth
-if(localStorage.getItem('currentPrediction')) document.getElementById('confirmBtn').disabled=false;
-
-const adminUsers=["bobmasterbillie"];
+// Demo user session (replace with Twitch OAuth)
+let user={username:"MasterBillie"}; // Replace with OAuth
+let adminUsers=["bobmasterbillie","beaststatsofficial","timepasstime"];
 if(adminUsers.includes(user.username.toLowerCase())) document.getElementById('adminLink').style.display='block';
 
+// Current prediction (simulate storage)
 const currentPrediction=JSON.parse(localStorage.getItem('currentPrediction')||'{}');
-const nominations=currentPrediction.nominations||[];
+const nominations=currentPrediction.nominations||[
+  "Abhishek Bajaj","Amaal Mallik","Ashnoor Kaur","Awez Darbar","Baseer Ali",
+  "Farhana Bhatt","Gaurav Khanna","Kunickaa Sadanand","Mridul Tiwari","Nagma Mirajkar",
+  "Natalia Janoszek","Neelam Giri","Nehal Chudasama","Pranit More","Shehbaz Badesha",
+  "Tanya Mittal","Zeishan Quadri","No Elimination","Double Elimination"
+];
 const endTime=currentPrediction.endTime?new Date(currentPrediction.endTime):null;
 
 const predictGrid=document.getElementById('predictGrid');
@@ -48,9 +71,10 @@ nominations.forEach(name=>{
   predictGrid.appendChild(div);
 });
 
+// Confirm Prediction
 document.getElementById('confirmBtn').onclick=()=>{
   const selected=predictGrid.querySelector('.card.selected');
-  if(!selected){alert('Select one contestant or option!'); return;}
+  if(!selected){alert('Select one option!'); return;}
   let saved=JSON.parse(localStorage.getItem('userPredictions')||'[]');
   saved.push({user:user.username,prediction:selected.querySelector('h3').innerText});
   localStorage.setItem('userPredictions',JSON.stringify(saved));
@@ -82,6 +106,7 @@ oldPreds.forEach(p=>{
   oldDiv.appendChild(div);
 });
 </script>
+
 </section>
 </body>
 </html>
