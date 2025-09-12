@@ -261,13 +261,15 @@ async function renderLeaderboard() {
     `;
   });
 }
+// ... (rest of your script.js code) ...
 
 async function updatePlayerScore(name, points, isManual) {
   try {
     const response = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'leaderboard', name, score: points, isManual }),
+      // Check if isManual is a boolean and send it if it is, otherwise, just send the score
+      body: JSON.stringify({ type: 'leaderboard', name, score: points, isManual: typeof isManual === 'boolean' ? isManual : false }),
     });
     if (!response.ok) throw new Error('Failed to update score');
     console.log('Score updated successfully!');
@@ -290,6 +292,7 @@ async function updateAllScores(eliminatedContestant) {
       alert("No one predicted correctly this week. 😟");
     }
 
+    // UPDATED: Correctly call updatePlayerScore with isManual flag set to false
     for (const player of correctPredictors) {
       await updatePlayerScore(player.user_name, 1, false);
     }
@@ -301,6 +304,7 @@ async function updateAllScores(eliminatedContestant) {
   }
 }
 
+// ... (rest of your script.js code) ...
 async function renderAdminPanel() {
   const adminMain = document.getElementById('admin-main');
   if (!adminMain) return;
