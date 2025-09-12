@@ -2,36 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Panel</title>
+  <title>Admin Panel - Bigg Boss 19</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="script.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="predict.html">Predict</a>
-    <a href="leaderboard.html">Leaderboard</a>
-    <a href="contestants.html">Contestants</a>
-  </nav>
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="predict.html">Predict</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="contestants.html">Contestants</a>
+      <a href="admin.html" class="active">Admin</a>
+    </nav>
+  </header>
 
-  <section class="container">
-    <h1>Admin Panel</h1>
-    <div id="admin-auth">
-      <input type="password" id="admin-pass" placeholder="Enter Admin Password">
-      <button onclick="checkAdmin()">Login</button>
+  <main>
+    <h1>⚙️ Admin Panel</h1>
+
+    <h2>Set Prediction Deadline</h2>
+    <div class="admin-controls">
+      <label for="end-date">Date: </label>
+      <input type="date" id="end-date">
+      <label for="end-time">Time: </label>
+      <input type="time" id="end-time">
     </div>
 
-    <div id="admin-tools" class="hidden">
-      <h2>Nominate Contestants</h2>
-      <div id="admin-contestants" class="gallery"></div>
-      <button onclick="saveNominations()">Save Nominations</button>
+    <h2>Select Nominees</h2>
+    <div class="contestants-grid" id="admin-contestants">
+      </div>
 
-      <h2>Manage Scores</h2>
-      <button onclick="updateScores()">Update Scores</button>
-
-      <h2>Game Settings</h2>
-      <button onclick="resetGame()">Reset Game</button>
+    <div class="admin-buttons">
+      <button class="btn" id="save-nominations">💾 Save Nominations</button>
+      <button class="btn" id="delete-prediction">🗑️ Delete Prediction</button>
     </div>
-  </section>
+
+    <hr>
+
+    <h2>Set Correct Elimination</h2>
+    <p>This can only be done after the prediction deadline has passed.</p>
+    <button class="btn" id="load-nominees">📋 Load Nominees</button>
+    <div class="contestants-grid" id="correct-answer-options">
+      </div>
+  </main>
 </body>
 </html>

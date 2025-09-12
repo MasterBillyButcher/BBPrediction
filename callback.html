@@ -2,21 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Twitch Callback</title>
-  <script>
-    window.onload = function () {
-      const params = new URLSearchParams(window.location.hash.slice(1));
-      const token = params.get("access_token");
-      if (token) {
-        localStorage.setItem("twitch_token", token);
-        window.location.href = "index.html";
-      } else {
-        document.body.innerHTML = "<h2>Error: No token received</h2>";
-      }
-    }
-  </script>
+  <title>Callback - Bigg Boss 19</title>
 </head>
 <body>
-  <h1>Authenticating...</h1>
+  <script>
+    // Twitch OAuth callback handler
+    const hash = window.location.hash.substr(1);
+    const params = new URLSearchParams(hash);
+    const token = params.get("access_token");
+    if (token) {
+      localStorage.setItem("twitch_token", token);
+      window.location.href = "index.html";
+    } else {
+      document.body.innerHTML = "<h1>Authentication failed. Please try again.</h1>";
+    }
+  </script>
 </body>
 </html>

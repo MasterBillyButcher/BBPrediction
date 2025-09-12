@@ -2,22 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bigg Boss 19 - Leaderboard</title>
+  <title>Leaderboard - Bigg Boss 19</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="script.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="predict.html">Predict</a>
-    <a href="leaderboard.html">Leaderboard</a>
-    <a href="contestants.html">Contestants</a>
-  </nav>
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="predict.html">Predict</a>
+      <a href="leaderboard.html" class="active">Leaderboard</a>
+      <a href="contestants.html">Contestants</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </header>
 
-  <section class="container">
-    <h1>Leaderboard</h1>
-    <input type="text" id="search" placeholder="Search player...">
-    <div id="leaderboard-grid" class="leaderboard-grid"></div>
-  </section>
+  <main>
+    <h1>🏆 Leaderboard</h1>
+    <div class="leaderboard-controls">
+      <input type="text" id="searchBar" placeholder="🔍 Search player...">
+      <select id="sortBy">
+        <option value="points">Sort by Points</option>
+        <option value="name">Sort by Name</option>
+      </select>
+    </div>
+    <div class="leaderboard-container">
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          </tbody>
+      </table>
+    </div>
+  </main>
 </body>
 </html>

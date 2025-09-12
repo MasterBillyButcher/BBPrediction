@@ -2,24 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bigg Boss 19 - Home</title>
+  <title>Bigg Boss 19 Prediction Game</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="script.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="predict.html">Predict</a>
-    <a href="leaderboard.html">Leaderboard</a>
-    <a href="contestants.html">Contestants</a>
-  </nav>
+  <header>
+    <nav>
+      <a href="index.html" class="active">Home</a>
+      <a href="predict.html">Predict</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="contestants.html">Contestants</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </header>
 
-  <section class="container">
-    <h1>Welcome to Bigg Boss 19 Prediction Game 🎉</h1>
-    <div id="user-info">
-      <button id="login-btn">Login with Twitch</button>
-    </div>
-    <p>Make predictions, climb the leaderboard, and compete with others in real time!</p>
-  </section>
+  <main>
+    <h1>🎉 Welcome to Bigg Boss 19 Prediction Game</h1>
+    <p style="text-align:center; max-width:600px; margin:auto;">
+      Login with Twitch to participate, predict weekly eliminations, and compete on the leaderboard.
+    </p>
+    <button class="btn" onclick="loginWithTwitch()">Login with Twitch</button>
+  </main>
 </body>
 </html>
