@@ -237,3 +237,30 @@ h1, h2 {
   color: gold;
   text-shadow: 0 0 5px gold;
 }
+/* Navbar Styling */
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Pushes content to the corners */
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #1a1a1a;
+    color: white;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin-right: 20px;
+}
+
+.nav-logo, .nav-admin {
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+}

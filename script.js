@@ -240,8 +240,7 @@ async function renderLeaderboard() {
   if (!leaderboardBody) return;
   const data = await fetchLeaderboardData();
   let filteredData = [...data];
-  
-  // No more sorting options, just sort by points
+
   filteredData.sort((a, b) => b.score - a.score);
   const search = document.getElementById("searchBar")?.value.toLowerCase() || "";
   filteredData = filteredData.filter(p => p.name.toLowerCase().includes(search));
@@ -283,13 +282,10 @@ async function updateAllScores(eliminatedContestant) {
     }
 
     for (const player of correctPredictors) {
-      await updatePlayerScore(player.user_name, 1, false); 
+      await updatePlayerScore(player.user_name, 1, false);
     }
 
     alert("✅ All scores have been updated!");
-    // Optional: clear predictions for the next round
-    // await fetch('/api/data?type=predictions', { method: 'DELETE' });
-
   } catch (error) {
     console.error("Error updating scores:", error);
     alert("There was an error updating scores. Check the console for details.");
@@ -341,7 +337,7 @@ async function renderAdminPanel() {
       <button id="deletePredictionsBtn" class="btn">🗑️ Delete User Predictions</button>
       <button id="cancelPredictionBtn" class="btn">❌ Cancel All Predictions</button>
     </div>
-    
+
     <h2>Manual Score Update</h2>
     <div class="admin-section">
       <p>Enter a player's name and points to update their score.</p>
