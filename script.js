@@ -20,8 +20,9 @@ const contestantData = [
 ];
 
 // === TWITCH AUTH & ADMIN LOGIC ===
-const CLIENT_ID = 'wtecr95eu66xeugoiph13ba69m9';
-const REDIRECT_URI = 'http://127.0.0.1:5500/callback.html';
+const CLIENT_ID = 'wtecr95tk5eu66xeugoiph13ba69m9';
+// Change this to your Vercel URL when deploying
+const REDIRECT_URI = 'http://127.0.0.1:5500/callback.html'; 
 const SCOPES = 'user:read:email';
 const ADMIN_USERNAME = 'bobmasterbillie';
 
@@ -144,6 +145,14 @@ async function renderAdminPanel() {
       <button id="deletePredictionsBtn" class="btn">🗑️ Delete User Predictions</button>
       <button id="cancelPredictionBtn" class="btn">❌ Cancel All Predictions</button>
     </div>
+    
+    <h2>Manual Score Update</h2>
+    <div class="admin-section">
+      <p>Enter a player's name and points to update their score.</p>
+      <input type="text" id="playerNameInput" placeholder="Player Name" class="admin-input">
+      <input type="number" id="playerScoreInput" placeholder="Points" class="admin-input">
+      <button id="updateScoreBtn" class="btn">Update Score</button>
+    </div>
   `;
 
   // All event listeners for admin panel
@@ -157,6 +166,10 @@ async function renderAdminPanel() {
   const currentDeadlineEl = document.getElementById("currentDeadline");
   const deletePredictionsBtn = document.getElementById("deletePredictionsBtn");
   const cancelPredictionBtn = document.getElementById("cancelPredictionBtn");
+  const playerNameInput = document.getElementById("playerNameInput");
+  const playerScoreInput = document.getElementById("playerScoreInput");
+  const updateScoreBtn = document.getElementById("updateScoreBtn");
+
 
   // Nomination Logic
   const nominationContestants = [
@@ -243,6 +256,20 @@ async function renderAdminPanel() {
       window.location.reload();
     }
   });
+
+  // Manual Score Update Logic
+  updateScoreBtn?.addEventListener("click", async () => {
+    const name = playerNameInput.value.trim();
+    const score = parseInt(playerScoreInput.value);
+    if (name && !isNaN(score)) {
+      await updatePlayerScore(name, score);
+      alert(`Score for ${name} updated successfully!`);
+      playerNameInput.value = "";
+      playerScoreInput.value = "";
+    } else {
+      alert("Please enter a valid player name and a number for the score.");
+    }
+  });
 }
 
 function renderPredictionPage() {
@@ -272,12 +299,19 @@ function renderPredictionPage() {
       submitPredictionBtn.disabled = true;
       submitPredictionBtn.textContent = "Prediction Submitted ✅";
     } else {
-      submitPredictionBtn.addEventListener("click", () => {
+      submitPredictionBtn.addEventListener("click", async () => {
         const selectedPrediction = document.querySelector(".contestant-card.selected h3");
         if (selectedPrediction) {
-          localStorage.setItem("userPrediction", selectedPrediction.textContent);
-          alert("Prediction submitted! Thanks for participating! 🎉");
-          window.location.reload();
+          const user = await fetchTwitchUser();
+          if (user) {
+            localStorage.setItem("userPrediction", selectedPrediction.textContent);
+            // This is where we update the score
+            await updatePlayerScore(user.username, 10); // Give 10 points for a correct prediction
+            alert("Prediction submitted! Thanks for participating! 🎉");
+            window.location.reload();
+          } else {
+            alert("Please login with Twitch to submit a prediction.");
+          }
         } else {
           alert("Please select a contestant before submitting your prediction.");
         }
@@ -288,6 +322,7 @@ function renderPredictionPage() {
     submitPredictionBtn.disabled = true;
   }
 }
+
 
 function renderContestantsPage() {
   const contestantsList = document.getElementById("contestants-list");
@@ -334,6 +369,21 @@ async function renderLeaderboard() {
       <td>${i + 1}</td><td>${p.name}</td><td>${p.score}</td>
     </tr>`;
   });
+}
+
+// Function to update a player's score
+async function updatePlayerScore(name, points) {
+  try {
+    const response = await fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, score: points }),
+    });
+    if (!response.ok) throw new Error('Failed to update score');
+    console.log('Score updated successfully!');
+  } catch (error) {
+    console.error("Score update error:", error);
+  }
 }
 
 // === MAIN LOGIC: INITIALIZE ON PAGE LOAD ===
