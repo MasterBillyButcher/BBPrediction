@@ -2,22 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Panel - Bigg Boss 19</title>
-  <link rel="stylesheet" href="/style.css">
-  <script src="/script.js" defer></script>
+  <title>Callback - Bigg Boss 19</title>
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="/index.html">Home</a>
-      <a href="/predict.html">Predict</a>
-      <a href="/leaderboard.html">Leaderboard</a>
-      <a href="/contestants.html">Contestants</a>
-      <a href="/admin.html" class="active">Admin</a>
-    </nav>
-  </header>
-
-  <main id="admin-main">
-    </main>
+  <script>
+    // Twitch OAuth callback handler
+    const hash = window.location.hash.substr(1);
+    const params = new URLSearchParams(hash);
+    const token = params.get("access_token");
+    if (token) {
+      localStorage.setItem("twitch_token", token);
+      window.location.href = "index.html";
+    } else {
+      document.body.innerHTML = "<h1>Authentication failed. Please try again.</h1>";
+    }
+  </script>
 </body>
 </html>
