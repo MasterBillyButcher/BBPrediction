@@ -12,37 +12,36 @@
 <p id="welcome"></p>
 <div id="adminActions" style="display:none;">
 <h3>Select Nominated Contestants</h3>
-<select id="nominations" multiple>
-  <!-- Will populate dynamically -->
-</select>
+<select id="nominations" multiple></select>
 <button onclick="publishNominations()">Publish Nominations</button>
 
 <h3>Set Prediction Result</h3>
-<select id="setResult">
-  <!-- Will populate dynamically -->
-</select>
+<select id="setResult"></select>
 <button onclick="setResultFunc()">Set Result</button>
 </div>
 </div>
 
 <script>
-// Admin usernames (add new admins by editing this array)
-let admins = ["bobmasterbillie"];
+// Admin Twitch usernames
+let admins = ["bobmasterbillie"]; 
 
+// All contestants
 const allContestants = ["Ashnoor Kaur","Gaurav Khanna","Awez Darbar","Nagma Mirajkar","Zeishan Qadri","Baseer Ali","Abhishek Bajaj","Taniya Mittal","Farrhana Bhatt","Amaal Mallik","Kunickaa Sadanand","Natalia Janoszek","Pranit More","Neelam Giri","Nehal Chudasma","Mridul Tiwari","Shehbaz Badesha"];
 
-// Replace this with Twitch username from token in production
-const twitchUsername = prompt("Enter your Twitch username for testing"); 
-document.getElementById("welcome").innerText = `Welcome ${twitchUsername}`;
+// Twitch username from OAuth
+const twitchUser = localStorage.getItem("twitchUser");
+document.getElementById("welcome").innerText = `Welcome ${twitchUser}`;
 
-if(admins.includes(twitchUsername)){
+if(admins.includes(twitchUser)){
     document.getElementById("adminActions").style.display="block";
+
     const sel1 = document.getElementById("nominations");
     allContestants.forEach(name=>{
         const opt = document.createElement("option");
         opt.textContent = name;
         sel1.appendChild(opt);
     });
+
     const sel2 = document.getElementById("setResult");
     allContestants.concat(["No Elimination","Double Elimination"]).forEach(name=>{
         const opt = document.createElement("option");

@@ -44,7 +44,7 @@ function selectPrediction(btn){
 document.getElementById("submitBtn").onclick = ()=>{
     if(!selectedPrediction){ alert("Select a prediction!"); return; }
     let votes = JSON.parse(localStorage.getItem("votes") || "{}");
-    const twitchUser = prompt("Enter Twitch username for testing");
+    const twitchUser = localStorage.getItem("twitchUser");
     votes[twitchUser] = selectedPrediction;
     localStorage.setItem("votes", JSON.stringify(votes));
     alert("Prediction submitted: "+selectedPrediction);
@@ -52,7 +52,7 @@ document.getElementById("submitBtn").onclick = ()=>{
 
 renderPredictions();
 
-// Countdown example (set to 1 hour from now)
+// Countdown (settable by admin, here default 1 hour)
 let endTime = new Date().getTime() + 3600*1000;
 let countdownEl = document.getElementById("countdown");
 setInterval(()=>{

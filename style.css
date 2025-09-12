@@ -1,59 +1,194 @@
-body {
+/* General Styles */
+body, html{
   margin:0;
+  padding:0;
   font-family:'Roboto', sans-serif;
   background-color:#121212;
-  color:#fff;
+  color:#FFFFFF;
 }
-.center-screen {
+
+.center-screen{
   display:flex;
   flex-direction:column;
-  align-items:center;
   justify-content:center;
-  height:100vh;
+  align-items:center;
+  min-height:100vh;
   text-align:center;
+  padding:20px;
 }
-button {
-  margin:10px;
-  padding:10px 20px;
-  background:#1E1E1E;
+
+h1,h2,h3{
+  font-family:'Montserrat', sans-serif;
   color:#39FF14;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
+  text-shadow:0 0 10px #39FF14;
 }
-button:hover { box-shadow:0 0 20px #39FF14; transform:translateY(-3px);}
+
+p{
+  color:#FFFFFF;
+}
+
+/* Home / Login Page */
+.home-bg{
+  background: linear-gradient(120deg,#121212,#1E1E1E);
+  background-image: url('https://i.ibb.co/Ny1b0YF/cyber-city.jpg');
+  background-size: cover;
+  background-position:center;
+  height:100vh;
+}
+
+.subtitle{
+  color:#39FF14;
+  text-shadow:0 0 10px #39FF14;
+  animation: blink 1.5s infinite;
+  margin-bottom:30px;
+}
+@keyframes blink{
+  0%,50%,100%{opacity:1;}
+  25%,75%{opacity:0.5;}
+}
+
+.neon-btn{
+  padding:15px 40px;
+  font-size:20px;
+  color:#39FF14;
+  background:none;
+  border:2px solid #39FF14;
+  border-radius:12px;
+  text-transform:uppercase;
+  font-weight:bold;
+  box-shadow:0 0 10px #39FF14, 0 0 20px #39FF14 inset;
+  cursor:pointer;
+  transition:0.3s;
+}
+.neon-btn:hover{
+  box-shadow:0 0 30px #39FF14, 0 0 40px #39FF14 inset;
+  transform:scale(1.1);
+}
+
+/* Contestant Cards */
 .contestants{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:20px;
-  padding:20px;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:2rem;
+  margin-top:2rem;
 }
 .card{
   background:#1E1E1E;
-  border-radius:12px;
+  border-radius:15px;
   overflow:hidden;
   text-align:center;
-  box-shadow:0 0 10px #39FF14;
+  box-shadow:0 0 15px rgba(57,255,20,0.3);
   transition:0.3s;
+}
+.card:hover{
+  transform:translateY(-7px);
+  box-shadow:0 0 25px rgba(57,255,20,0.6);
 }
 .card img{
   width:100%;
-  height:200px;
+  height:220px;
   object-fit:cover;
 }
-.card:hover{transform:translateY(-5px); box-shadow:0 0 20px #39FF14;}
+.card h3{
+  margin:10px 0;
+  color:#39FF14;
+}
+.card a{
+  color:#FFFFFF;
+  text-decoration:none;
+  font-size:0.9rem;
+}
+
+/* Prediction Buttons */
 .prediction-btn{
   display:block;
   width:250px;
-  margin:10px auto;
+  margin:15px auto;
   padding:15px;
-  font-size:16px;
+  font-size:18px;
   border-radius:12px;
   background:#1E1E1E;
   color:#39FF14;
-  border:none;
+  border:2px solid #39FF14;
   cursor:pointer;
+  transition:0.3s;
+  text-align:center;
 }
-.prediction-btn.selected{background:#39FF14; color:#121212;}
-.prediction-btn:hover{box-shadow:0 0 20px #39FF14; transform:translateY(-3px);}
+.prediction-btn:hover{
+  background:#39FF14;
+  color:#121212;
+  transform:scale(1.05);
+}
+.prediction-btn.selected{
+  background:#39FF14;
+  color:#121212;
+  box-shadow:0 0 15px #39FF14;
+}
+
+/* Admin Panel */
+.admin-panel{
+  margin-top:2rem;
+  padding:20px;
+  background:#1E1E1E;
+  border-radius:15px;
+  box-shadow:0 0 15px rgba(57,255,20,0.3);
+}
+.admin-panel h3{
+  color:#39FF14;
+}
+.admin-panel select, .admin-panel button{
+  margin:10px 0;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  font-size:16px;
+}
+.admin-panel button{
+  background:#39FF14;
+  color:#121212;
+  cursor:pointer;
+  transition:0.3s;
+}
+.admin-panel button:hover{
+  background:#1E1E1E;
+  color:#39FF14;
+  border:2px solid #39FF14;
+}
+
+/* Leaderboard */
+.table-leaderboard{
+  width:90%;
+  margin:20px auto;
+  border-collapse:collapse;
+}
+.table-leaderboard th, .table-leaderboard td{
+  border:1px solid #39FF14;
+  padding:12px;
+  text-align:center;
+}
+.table-leaderboard th{
+  background:#1E1E1E;
+}
+.table-leaderboard tr:nth-child(even){
+  background:#121212;
+}
+.table-leaderboard tr:hover{
+  background:#39FF14;
+  color:#121212;
+  font-weight:bold;
+}
+
+/* Rules Page */
+.rules-container{
+  width:90%;
+  max-width:800px;
+  margin:20px auto;
+  text-align:left;
+}
+.rules-container ul{
+  list-style-type:circle;
+  padding-left:20px;
+}
+.rules-container li{
+  margin:10px 0;
+}
