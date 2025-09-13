@@ -1,4 +1,11 @@
 import { sql } from "@vercel/postgres";
+import { neon } from '@neondatabase/serverless';
+
+// This line makes sure the API connects to your STORAGE_URL
+// Vercel and Neon automatically handle this, but it's a good
+// practice to explicitly set it for clarity and to prevent
+// any connection issues with custom variable names.
+const sql = neon(process.env.STORAGE_URL);
 
 export default async function handler(req, res) {
   try {
