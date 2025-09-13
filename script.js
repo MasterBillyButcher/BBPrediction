@@ -65,13 +65,23 @@ async function handleAdminNav() {
 
 function handleLogout() {
   const logoutBtn = document.getElementById('logoutBtn');
-  if (!logoutBtn) return;
-
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('twitch_token');
-    localStorage.removeItem('twitch_username');
-    window.location.href = '/';
-  });
+  const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+  
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('twitch_token');
+      localStorage.removeItem('twitch_username');
+      window.location.href = '/';
+    });
+  }
+  
+  if (logoutBtnMobile) {
+    logoutBtnMobile.addEventListener('click', () => {
+      localStorage.removeItem('twitch_token');
+      localStorage.removeItem('twitch_username');
+      window.location.href = '/';
+    });
+  }
 }
 
 // === PAGE RENDERING FUNCTIONS ===
@@ -336,7 +346,7 @@ async function updateAllScores(eliminatedContestant) {
     if (!predictionsResponse.ok) throw new Error('Failed to fetch predictions');
     const predictions = await predictionsResponse.json();
 
-    const correctPredictors = predictions.filter(p => p.prediction === eliminatedContestant);
+    const correctPredictors = predictions.filter(p => p.prediction === eliminatedContated);
 
     if (correctPredictors.length > 0) {
       alert(`🎉 ${correctPredictors.length} player(s) predicted correctly! Updating scores...`);
