@@ -2,13 +2,13 @@ import { sql } from "@vercel/postgres";
 
 export default async function handler(req, res) {
   try {
-    const { type, name, score, prediction, user_name, isManual } = req.body;
+    const { type, name, score, prediction, user_name } = req.body || req.query;
 
     if (req.method === 'POST') {
       if (type === 'leaderboard') {
         const result = await sql`
           INSERT INTO leaderboard (name, score) VALUES (${name}, ${score})
-          ON CONFLICT (name) DO UPDATE SET score = leaderboard.score + ${score};
+          ON CONFLICT (name) DO UPDATE SET score = leaderboard.score + EXCLUDED.score;
         `;
         return res.status(200).json(result.rows);
       }
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       if (type === 'prediction') {
         await sql`
           INSERT INTO predictions (user_name, prediction) VALUES (${user_name}, ${prediction})
-          ON CONFLICT (user_name) DO UPDATE SET prediction = ${prediction};
+          ON CONFLICT (user_name) DO UPDATE SET prediction = EXCLUDED.prediction;
         `;
         return res.status(200).json({ success: true, message: 'Prediction saved successfully!' });
       }
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       }
 
     } else if (req.method === 'DELETE') {
-      if (type === 'predictions') {
+      if (req.body.type === 'predictions') {
         await sql`DELETE FROM predictions;`;
         return res.status(200).json({ success: true, message: 'Predictions deleted successfully!' });
       }
