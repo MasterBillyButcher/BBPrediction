@@ -129,7 +129,6 @@ async function renderHomePage() {
   }
 }
 
-// NEW: Function to fetch a single user's prediction from the database
 async function fetchUserPrediction(username) {
   try {
     const response = await fetch(`/api/data?type=prediction&user_name=${username}`);
@@ -158,7 +157,6 @@ async function renderPredictionPage() {
     return;
   }
 
-  // UPDATED: Fetch prediction from the database instead of local storage
   const userPrediction = await fetchUserPrediction(user.username);
 
   if (deadline && now < parseInt(deadline)) {
@@ -186,7 +184,6 @@ async function renderPredictionPage() {
         const selectedPrediction = document.querySelector("#prediction-options > div.border-green-500 h3");
         if (selectedPrediction) {
           try {
-            // UPDATED: Save prediction to the database
             const response = await fetch('/api/data', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -261,15 +258,13 @@ async function renderLeaderboard() {
     `;
   });
 }
-// ... (rest of your script.js code) ...
 
-async function updatePlayerScore(name, points, isManual) {
+async function updatePlayerScore(name, points) {
   try {
     const response = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // Check if isManual is a boolean and send it if it is, otherwise, just send the score
-      body: JSON.stringify({ type: 'leaderboard', name, score: points, isManual: typeof isManual === 'boolean' ? isManual : false }),
+      body: JSON.stringify({ type: 'leaderboard', name, score: points }),
     });
     if (!response.ok) throw new Error('Failed to update score');
     console.log('Score updated successfully!');
@@ -292,9 +287,8 @@ async function updateAllScores(eliminatedContestant) {
       alert("No one predicted correctly this week. 😟");
     }
 
-    // UPDATED: Correctly call updatePlayerScore with isManual flag set to false
     for (const player of correctPredictors) {
-      await updatePlayerScore(player.user_name, 1, false);
+      await updatePlayerScore(player.user_name, 1);
     }
 
     alert("✅ All scores have been updated!");
@@ -304,7 +298,6 @@ async function updateAllScores(eliminatedContestant) {
   }
 }
 
-// ... (rest of your script.js code) ...
 async function renderAdminPanel() {
   const adminMain = document.getElementById('admin-main');
   if (!adminMain) return;
@@ -500,7 +493,7 @@ async function renderAdminPanel() {
     const name = playerNameInput.value.trim();
     const score = parseInt(playerScoreInput.value);
     if (name && !isNaN(score)) {
-      await updatePlayerScore(name, score, true);
+      await updatePlayerScore(name, score);
       alert(`Score for ${name} updated successfully!`);
       playerNameInput.value = "";
       playerScoreInput.value = "";
