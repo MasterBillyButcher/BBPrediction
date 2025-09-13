@@ -7,18 +7,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
-    <nav class="bg-gray-800 p-4 shadow-lg flex justify-between items-center">
-        <div class="flex items-center">
-            <a id="adminLink" href="admin.html" class="text-green-400 font-bold text-lg mr-4 p-2 border-2 border-green-400 rounded-lg hidden">Admin</a>
-            <span class="text-white font-bold text-lg">BB19</span>
+    <nav class="bg-gray-800 p-4 shadow-2xl z-10 sticky top-0">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a id="adminLink" href="admin.html" class="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-lg px-4 py-2 rounded-full shadow-lg transform transition-transform duration-300 hover:scale-105 hidden">Admin</a>
+                <span class="text-white font-bold text-2xl tracking-wide">BB19</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="index.html" class="text-white text-lg font-medium transition-colors duration-300 hover:text-green-400">Home</a>
+                <a href="predict.html" class="text-white text-lg font-medium transition-colors duration-300 hover:text-green-400">Prediction</a>
+                <a href="leaderboard.html" class="text-white text-lg font-medium transition-colors duration-300 hover:text-green-400">Leaderboard</a>
+                <a href="contestants.html" class="text-white text-lg font-medium transition-colors duration-300 hover:text-green-400">Contestants</a>
+            </div>
         </div>
-        <div class="space-x-4 flex-1 text-center">
-            <a href="index.html" class="text-white hover:text-green-400">Home</a>
-            <a href="predict.html" class="text-white hover:text-green-400">Prediction</a>
-            <a href="leaderboard.html" class="text-white hover:text-green-400">Leaderboard</a>
-            <a href="contestants.html" class="text-white hover:text-green-400">Contestants</a>
-        </div>
-        <div></div>
     </nav>
     <main id="main-content" class="container mx-auto mt-8 p-4">
         <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-8 text-center">Contestants</h1>

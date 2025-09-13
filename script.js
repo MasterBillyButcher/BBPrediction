@@ -52,15 +52,15 @@ async function fetchTwitchUser() {
 }
 
 async function handleAdminNav() {
-  const adminLink = document.getElementById('adminLink');
-  if (!adminLink) return;
+    const adminLink = document.getElementById('adminLink');
+    if (!adminLink) return;
 
-  const user = await fetchTwitchUser();
-  if (user && ADMINS.includes(user.username)) {
-    adminLink.classList.remove('hidden');
-  } else {
-    adminLink.classList.add('hidden');
-  }
+    const user = await fetchTwitchUser();
+    if (user && ADMINS.includes(user.username)) {
+        adminLink.classList.remove('hidden');
+    } else {
+        adminLink.classList.add('hidden');
+    }
 }
 
 // === PAGE RENDERING FUNCTIONS ===
@@ -549,8 +549,8 @@ async function renderAdminPanel() {
 
 function highlightActiveNavLink() {
     const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-    const navLinks = document.querySelectorAll('nav a');
-    
+    const navLinks = document.querySelectorAll('nav a:not(#adminLink)');
+
     navLinks.forEach(link => {
         const linkPath = link.href.split('/').pop() || 'index.html';
         link.classList.remove('text-green-400', 'font-bold');
