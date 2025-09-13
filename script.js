@@ -145,7 +145,8 @@ async function fetchUserPrediction(username) {
 async function renderPredictionPage() {
   const predictContainer = document.getElementById("prediction-options");
   const submitPredictionBtn = document.getElementById("submitPrediction");
-  if (!predictContainer || !submitPredictionBtn) return;
+  const predictionText = document.getElementById("prediction-text");
+  if (!predictContainer || !submitPredictionBtn || !predictionText) return;
 
   const deadline = localStorage.getItem("deadline");
   const now = new Date().getTime();
@@ -154,6 +155,7 @@ async function renderPredictionPage() {
   if (!user) {
     predictContainer.innerHTML = "<p class='text-lg text-gray-400'>Please login with Twitch to make a prediction.</p>";
     submitPredictionBtn.style.display = 'none';
+    predictionText.style.display = 'none'; // Hide the prediction text
     return;
   }
 
@@ -161,6 +163,8 @@ async function renderPredictionPage() {
 
   if (deadline && now < parseInt(deadline)) {
     const nominations = JSON.parse(localStorage.getItem("nominations")) || [];
+    predictionText.innerHTML = "Who will be eliminated? 🎯";
+    predictionText.style.display = 'block';
     nominations.forEach(name => {
       const card = createContestantCard(name);
       predictContainer.appendChild(card);
@@ -203,8 +207,9 @@ async function renderPredictionPage() {
       });
     }
   } else {
-    predictContainer.innerHTML = "<p class='text-lg text-gray-400'>Prediction submissions are currently closed.</p>";
+    predictContainer.innerHTML = `<h2 class="text-xl md:text-2xl font-bold text-red-500 text-center">Prediction submissions are currently closed.</h2>`;
     submitPredictionBtn.style.display = 'none';
+    predictionText.style.display = 'none'; // Hide the prediction text
   }
 }
 
