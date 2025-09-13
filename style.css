@@ -1,78 +1,52 @@
-/* Base styles for all screen sizes */
-body {
-  background-color: #1a1a1a;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
+/* style.css - custom styles for BB19 Prediction (keep HTML in an .html file, not here) */
+
+:root {
+  --bg: #0f172a;
+  --muted: #9ca3af;
+  --green: #10b981;
 }
 
-/* Nav styles */
-nav {
-  background-color: #0d0d0d;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+/* Base layout */
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: var(--bg);
+  color: #ffffff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
-nav a {
-  color: #38bdf8;
-  font-weight: bold;
-  text-decoration: none;
-  font-size: 1.2rem;
-  transition: color 0.3s;
-  margin: 0 1rem;
-}
-
-nav a:hover {
-  color: #2563eb;
-}
-
-#main-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 80px); /* Adjust based on nav height */
-  text-align: center;
-  padding: 1rem;
-}
-
+/* Simple container to mirror Tailwind container usage */
 .container {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
-/* Contestants page grid */
-#contestants-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 2rem;
+/* Utilities */
+.hidden {
+  display: none !important;
 }
 
-/* Prediction page specific styles */
-#prediction-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+a {
+  color: var(--green);
+  text-decoration: none;
 }
 
-#prediction-options .bg-gray-800 {
-  cursor: pointer;
+/* Nav and footer fallbacks if Tailwind isn't loaded yet */
+nav {
+  background: #1f2937;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
-#submitPrediction {
-  margin-top: 2rem;
-}
-
-/* New styles for the "closed" message */
-#prediction-page h2 {
+footer {
+  background: #1f2937;
+  padding: 1rem;
+  color: var(--muted);
   text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #e53e3e;
-  padding: 2rem;
 }
