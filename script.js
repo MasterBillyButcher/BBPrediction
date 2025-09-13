@@ -95,28 +95,26 @@ async function renderHomePage() {
     const userRank = sortedLeaderboard.findIndex(p => p.name === user.username) + 1;
 
     mainContent.innerHTML = `
-      <div class="p-8 md:p-12 lg:p-16 bg-gray-900 rounded-2xl shadow-2xl border-2 border-green-500">
+      <div class="w-full max-w-4xl p-8 md:p-12 lg:p-16 bg-gray-800 rounded-2xl shadow-2xl border-2 border-green-500 text-center animate-fade-in">
         <img src="${user.profileImageUrl}" alt="User PFP" class="mx-auto rounded-full w-32 h-32 md:w-40 md:h-40 border-4 border-green-400 shadow-lg mb-6">
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4">Welcome, <strong class="text-green-400">${user.username}</strong>! 🎉</h1>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight">Welcome, <strong class="text-green-400">${user.username}</strong>! 🎉</h1>
         <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex-1">
-                <h3 class="text-lg text-gray-400">Your Score</h3>
-                <p class="text-4xl font-bold text-green-500 mt-2">${userScore}</p>
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex-1 transform transition-transform duration-300 hover:scale-105">
+                <h3 class="text-lg text-gray-300">Your Score</h3>
+                <p class="text-5xl font-bold text-green-500 mt-2">${userScore}</p>
             </div>
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex-1">
-                <h3 class="text-lg text-gray-400">Your Rank</h3>
-                <p class="text-4xl font-bold text-green-500 mt-2">${userRank > 0 ? userRank : 'N/A'}</p>
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex-1 transform transition-transform duration-300 hover:scale-105">
+                <h3 class="text-lg text-gray-300">Your Rank</h3>
+                <p class="text-5xl font-bold text-green-500 mt-2">${userRank > 0 ? userRank : 'N/A'}</p>
             </div>
         </div>
-        <p class="mt-8 text-lg text-gray-400 max-w-2xl mx-auto">You are now logged in and ready to make your predictions. Use the navigation bar to get started.</p>
-        <div id="topTenLeaderboard" class="mt-12"></div>
+        <p class="mt-8 text-lg text-gray-400 max-w-2xl mx-auto">You're logged in and ready to predict. Use the navigation bar to get started.</p>
       </div>
     `;
-    renderTopTen();
   } else {
     mainContent.innerHTML = `
-      <div class="p-8 md:p-12 lg:p-16 bg-gray-900 rounded-2xl shadow-2xl border-2 border-green-500">
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4">🎉 Welcome to BB 19 Prediction Game</h1>
+      <div class="w-full max-w-4xl p-8 md:p-12 lg:p-16 bg-gray-800 rounded-2xl shadow-2xl border-2 border-green-500 text-center animate-fade-in">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight">🎉 Welcome to BB 19 Prediction Game</h1>
         <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-8">
             Login with Twitch to participate, predict weekly eliminations, and compete on the leaderboard.
         </p>
