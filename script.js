@@ -111,7 +111,6 @@ async function renderHomePage() {
         <div class="flex flex-col items-center mb-6">
           <div class="relative w-40 h-40 md:w-48 md:h-48">
             <img src="${user.profileImageUrl}" alt="User PFP" class="rounded-full w-full h-full border-4 border-green-400 shadow-lg">
-            <button id="logoutBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">Logout</button>
           </div>
         </div>
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight">Welcome, <strong class="text-green-400">${user.username}</strong>! 🎉</h1>
