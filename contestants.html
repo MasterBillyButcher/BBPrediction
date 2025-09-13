@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BB19 Prediction - Contestants</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Contestants - BB19</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
     <nav class="bg-gray-800 p-4 shadow-lg flex justify-between items-center">
@@ -18,15 +16,15 @@
             <a href="index.html" class="text-white hover:text-green-400">Home</a>
             <a href="predict.html" class="text-white hover:text-green-400">Prediction</a>
             <a href="leaderboard.html" class="text-white hover:text-green-400">Leaderboard</a>
-            <a href="contestants.html" class="text-green-400 font-bold">Contestants</a>
+            <a href="contestants.html" class="text-white hover:text-green-400">Contestants</a>
             <a id="adminLink" href="admin.html" class="text-white hover:text-green-400" style="display:none;">Admin</a>
         </div>
     </nav>
-    <div id="main-content" class="container mx-auto mt-8 p-4">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-8 mt-4 text-center">👑 Bigg Boss 19 Contestants</h1>
-        <div id="contestants-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
-    </div>
-
+    <main id="main-content" class="container mx-auto mt-8 p-4">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-8 text-center">Contestants</h1>
+        <div id="contestants-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            </div>
+    </main>
     <script src="script.js"></script>
 </body>
 </html>

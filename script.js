@@ -160,19 +160,34 @@ async function renderPredictionPage() {
   }
 
   const userPrediction = await fetchUserPrediction(user.username);
+  const predictionsClosed = !deadline || now >= parseInt(deadline);
 
-  if (deadline && now < parseInt(deadline)) {
-    // Predictions are open
-    const nominations = JSON.parse(localStorage.getItem("nominations")) || [];
-    const predictionPageContent = document.createElement('div');
-    predictionPageContent.innerHTML = `
-      <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-4 text-center">Predict the Winner! 🎯</h1>
-      <p id="prediction-text" class="text-lg text-gray-400 text-center mb-8">Select a contestant from the nominated list below who you think will win this week!</p>
-      <div id="prediction-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
-      <div class="text-center mt-8">
-        <button id="submitPrediction" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">Submit Prediction</button>
+  if (predictionsClosed) {
+    mainContent.innerHTML = `
+      <div class="flex items-center justify-center min-h-screen text-center -mt-24">
+        <div class="p-8">
+          <h1 class="text-4xl md:text-5xl font-extrabold text-red-500 mb-4 animate-pulse">🚫 Prediction submissions are currently closed.</h1>
+          <p class="text-lg text-gray-400">Please check back later for the next round!</p>
+        </div>
       </div>
     `;
+  } else {
+    const nominations = JSON.parse(localStorage.getItem("nominations")) || [];
+    const predictionPageContent = document.createElement('div');
+    
+    predictionPageContent.innerHTML = `
+      ${userPrediction ?
+      `<h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-4 text-center">Your Prediction is In! ✅</h1>
+       <p id="prediction-text" class="text-lg text-gray-400 text-center mb-8">You have already predicted. You can change your prediction by re-selecting and submitting below.</p>` :
+      `<h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-4 text-center">Predict the Winner! 🎯</h1>
+       <p id="prediction-text" class="text-lg text-gray-400 text-center mb-8">Select a contestant from the nominated list below who you think will win this week!</p>`
+      }
+      <div id="prediction-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+      <div class="text-center mt-8">
+          <button id="submitPrediction" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">Submit Prediction</button>
+      </div>
+    `;
+    
     mainContent.appendChild(predictionPageContent);
 
     const predictContainer = document.getElementById("prediction-options");
@@ -183,50 +198,34 @@ async function renderPredictionPage() {
       predictContainer.appendChild(card);
       if (userPrediction && name === userPrediction) {
         card.classList.add("border-4", "border-blue-500", "shadow-blue-500");
-      } else {
-        card.addEventListener("click", () => {
-          document.querySelectorAll("#prediction-options > div").forEach(c => c.classList.remove("border-4", "border-green-500", "shadow-green-500"));
-          card.classList.add("border-4", "border-green-500", "shadow-green-500");
-        });
       }
+      card.addEventListener("click", () => {
+        document.querySelectorAll("#prediction-options > div").forEach(c => c.classList.remove("border-4", "border-blue-500", "shadow-blue-500"));
+        card.classList.add("border-4", "border-blue-500", "shadow-blue-500");
+      });
     });
 
-    if (userPrediction) {
-      submitPredictionBtn.disabled = true;
-      submitPredictionBtn.textContent = "Prediction Submitted ✅";
-      submitPredictionBtn.classList.remove("bg-green-500", "hover:bg-green-600");
-      submitPredictionBtn.classList.add("bg-gray-500", "cursor-not-allowed");
-    } else {
-      submitPredictionBtn.addEventListener("click", async () => {
-        const selectedPrediction = document.querySelector("#prediction-options > div.border-green-500 h3");
-        if (selectedPrediction) {
-          try {
-            const response = await fetch('/api/data', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type: 'prediction', user_name: user.username, prediction: selectedPrediction.textContent }),
-            });
-            if (!response.ok) throw new Error('Failed to save prediction');
+    submitPredictionBtn.addEventListener("click", async () => {
+      const selectedPrediction = document.querySelector("#prediction-options > div.border-blue-500 h3");
+      if (selectedPrediction) {
+        try {
+          const response = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'prediction', user_name: user.username, prediction: selectedPrediction.textContent }),
+          });
+          if (!response.ok) throw new Error('Failed to save prediction');
 
-            alert("Prediction submitted! Thanks for participating! 🎉");
-            window.location.reload();
-          } catch (error) {
-            console.error("Prediction submission error:", error);
-            alert("Error submitting prediction. Please try again.");
-          }
-        } else {
-          alert("Please select a contestant before submitting your prediction.");
+          alert("Prediction submitted! Thanks for participating! 🎉");
+          window.location.reload();
+        } catch (error) {
+          console.error("Prediction submission error:", error);
+          alert("Error submitting prediction. Please try again.");
         }
-      });
-    }
-  } else {
-    // Predictions are closed
-    mainContent.innerHTML = `
-      <div class="text-center p-8">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-red-500 mb-4">🚫 Prediction submissions are currently closed.</h1>
-        <p class="text-lg text-gray-400">Please check back later for the next round!</p>
-      </div>
-    `;
+      } else {
+        alert("Please select a contestant before submitting your prediction.");
+      }
+    });
   }
 }
 
@@ -548,57 +547,41 @@ async function renderAdminPanel() {
   });
 }
 
-async function renderTopTen() {
-  const topTenContainer = document.getElementById('topTenLeaderboard');
-  if (!topTenContainer) return;
-  const data = await fetchLeaderboardData();
-  const topTen = data.sort((a, b) => b.score - a.score).slice(0, 10);
-  if (topTen.length === 0) {
-    topTenContainer.innerHTML = "<h2 class='text-xl text-gray-400'>No scores to display yet.</h2>";
-    return;
-  }
-  topTenContainer.innerHTML = `
-    <h2 class="text-3xl font-bold text-white mb-6">Top 10 Players 🏆</h2>
-    <div class="bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
-        <table class="min-w-full divide-y divide-gray-700">
-            <thead class="bg-gray-800">
-                <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Rank</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Player</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Points</th>
-                </tr>
-            </thead>
-            <tbody class="bg-gray-900 divide-y divide-gray-800">
-                ${topTen.map((p, i) => `
-                    <tr class="even:bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${i + 1}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${p.name}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-400 font-bold">${p.score}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    </div>
-  `;
+function highlightActiveNavLink() {
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    const navLinks = document.querySelectorAll('nav a');
+    
+    navLinks.forEach(link => {
+        const linkPath = link.href.split('/').pop() || 'index.html';
+        link.classList.remove('text-green-400', 'font-bold');
+        link.classList.add('text-white', 'hover:text-green-400');
+        
+        if (linkPath === currentPath) {
+            link.classList.add('text-green-400', 'font-bold');
+            link.classList.remove('text-white', 'hover:text-green-400');
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const storedAdmins = localStorage.getItem('admin_users');
-  if (storedAdmins) {
-    ADMINS = JSON.parse(storedAdmins);
-  }
+    const storedAdmins = localStorage.getItem('admin_users');
+    if (storedAdmins) {
+        ADMINS = JSON.parse(storedAdmins);
+    }
+    
+    handleAdminNav();
+    highlightActiveNavLink();
 
-  handleAdminNav();
-  const path = window.location.pathname;
-  if (path.includes('index.html') || path === '/') {
-    renderHomePage();
-  } else if (path.includes('admin.html')) {
-    renderAdminPanel();
-  } else if (path.includes('predict.html')) {
-    renderPredictionPage();
-  } else if (path.includes('contestants.html')) {
-    renderContestantsPage();
-  } else if (path.includes('leaderboard.html')) {
-    renderLeaderboard();
-  }
+    const path = window.location.pathname;
+    if (path.includes('index.html') || path === '/') {
+        renderHomePage();
+    } else if (path.includes('admin.html')) {
+        renderAdminPanel();
+    } else if (path.includes('predict.html')) {
+        renderPredictionPage();
+    } else if (path.includes('contestants.html')) {
+        renderContestantsPage();
+    } else if (path.includes('leaderboard.html')) {
+        renderLeaderboard();
+    }
 });
