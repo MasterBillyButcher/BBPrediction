@@ -143,28 +143,41 @@ async function fetchUserPrediction(username) {
 }
 
 async function renderPredictionPage() {
-  const predictContainer = document.getElementById("prediction-options");
-  const submitPredictionBtn = document.getElementById("submitPrediction");
-  const predictionText = document.getElementById("prediction-text");
-  if (!predictContainer || !submitPredictionBtn || !predictionText) return;
-
+  const mainContent = document.getElementById('main-content');
   const deadline = localStorage.getItem("deadline");
   const now = new Date().getTime();
   const user = await fetchTwitchUser();
 
+  mainContent.innerHTML = ''; // Clear all existing content
+
   if (!user) {
-    predictContainer.innerHTML = "<p class='text-lg text-gray-400'>Please login with Twitch to make a prediction.</p>";
-    submitPredictionBtn.style.display = 'none';
-    predictionText.style.display = 'none'; // Hide the prediction text
+    mainContent.innerHTML = `
+      <div class="text-center p-8">
+        <p class='text-lg text-gray-400'>Please login with Twitch to make a prediction.</p>
+      </div>
+    `;
     return;
   }
 
   const userPrediction = await fetchUserPrediction(user.username);
 
   if (deadline && now < parseInt(deadline)) {
+    // Predictions are open
     const nominations = JSON.parse(localStorage.getItem("nominations")) || [];
-    predictionText.innerHTML = "Who will be eliminated? 🎯";
-    predictionText.style.display = 'block';
+    const predictionPageContent = document.createElement('div');
+    predictionPageContent.innerHTML = `
+      <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-4 text-center">Predict the Winner! 🎯</h1>
+      <p id="prediction-text" class="text-lg text-gray-400 text-center mb-8">Who will be eliminated? 🤔</p>
+      <div id="prediction-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+      <div class="text-center mt-8">
+        <button id="submitPrediction" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">Submit Prediction</button>
+      </div>
+    `;
+    mainContent.appendChild(predictionPageContent);
+
+    const predictContainer = document.getElementById("prediction-options");
+    const submitPredictionBtn = document.getElementById("submitPrediction");
+
     nominations.forEach(name => {
       const card = createContestantCard(name);
       predictContainer.appendChild(card);
@@ -207,15 +220,23 @@ async function renderPredictionPage() {
       });
     }
   } else {
-    predictContainer.innerHTML = `<h2 class="text-xl md:text-2xl font-bold text-red-500 text-center">Prediction submissions are currently closed.</h2>`;
-    submitPredictionBtn.style.display = 'none';
-    predictionText.style.display = 'none'; // Hide the prediction text
+    // Predictions are closed
+    mainContent.innerHTML = `
+      <div class="text-center p-8">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-red-500 mb-4">🚫 Prediction submissions are currently closed.</h1>
+        <p class="text-lg text-gray-400">Please check back later for the next round!</p>
+      </div>
+    `;
   }
 }
 
 function renderContestantsPage() {
+  const mainContent = document.getElementById("main-content");
+  mainContent.innerHTML = `
+    <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-8 mt-4 text-center">👑 Bigg Boss 19 Contestants</h1>
+    <div id="contestants-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+  `;
   const contestantsList = document.getElementById("contestants-list");
-  if (!contestantsList) return;
   contestantData.forEach(contestant => {
     const instagramURL = `https://www.instagram.com/${contestant.instagram}`;
     const card = document.createElement("div");
@@ -243,13 +264,35 @@ async function fetchLeaderboardData() {
 }
 
 async function renderLeaderboard() {
+  const mainContent = document.getElementById("main-content");
+  mainContent.innerHTML = `
+    <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-8 mt-4 text-center">🏆 Leaderboard</h1>
+    <div class="mb-4 text-center">
+      <input type="text" id="searchBar" placeholder="Search by name..." class="p-2 rounded-lg bg-gray-800 text-white border-2 border-green-500 focus:outline-none focus:ring-2 focus:ring-green-400">
+    </div>
+    <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden mt-8">
+      <table class="min-w-full divide-y divide-gray-700">
+        <thead class="bg-gray-700">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Rank</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Player</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-green-400 uppercase tracking-wider">Points</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody" class="bg-gray-800 divide-y divide-gray-700">
+          </tbody>
+      </table>
+    </div>
+  `;
+  const searchBar = document.getElementById("searchBar");
+  searchBar.addEventListener('input', renderLeaderboard);
+  
   const leaderboardBody = document.getElementById("leaderboardBody");
-  if (!leaderboardBody) return;
   const data = await fetchLeaderboardData();
   let filteredData = [...data];
 
   filteredData.sort((a, b) => b.score - a.score);
-  const search = document.getElementById("searchBar")?.value.toLowerCase() || "";
+  const search = searchBar.value.toLowerCase();
   filteredData = filteredData.filter(p => p.name.toLowerCase().includes(search));
 
   leaderboardBody.innerHTML = "";
