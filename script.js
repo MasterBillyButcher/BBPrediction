@@ -57,9 +57,9 @@ async function handleAdminNav() {
 
   const user = await fetchTwitchUser();
   if (user && ADMINS.includes(user.username)) {
-    adminLink.style.display = 'block';
+    adminLink.classList.remove('hidden');
   } else {
-    adminLink.style.display = 'none';
+    adminLink.classList.add('hidden');
   }
 }
 
