@@ -1,3 +1,9 @@
+// === IMPORTANT: REPLACE WITH YOUR SUPABASE KEYS ===
+const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL_HERE';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // === CONSTANT DATA ===
 const contestantData = [
   { name: "Abhishek Bajaj", instagram: "humarabajaj24" },
@@ -146,11 +152,16 @@ async function renderHomePage() {
 
 async function fetchUserPrediction(username) {
   try {
-    const response = await fetch(`/api/data?type=prediction&user_name=${username}`);
-    if (response.status === 404) return null;
-    if (!response.ok) throw new Error('Failed to fetch prediction');
-    const data = await response.json();
-    return data.prediction;
+    const { data, error } = await supabase
+      .from('predictions')
+      .select('prediction')
+      .eq('user_name', username)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+    return data ? data.prediction : null;
   } catch (error) {
     console.error("Prediction fetch error:", error);
     return null;
@@ -163,7 +174,7 @@ async function renderPredictionPage() {
   const now = new Date().getTime();
   const user = await fetchTwitchUser();
 
-  mainContent.innerHTML = ''; // Clear all existing content
+  mainContent.innerHTML = '';
 
   if (!user) {
     mainContent.innerHTML = `
@@ -223,13 +234,36 @@ async function renderPredictionPage() {
     submitPredictionBtn.addEventListener("click", async () => {
       const selectedPrediction = document.querySelector("#prediction-options > div.border-blue-500 h3");
       if (selectedPrediction) {
+        const prediction = selectedPrediction.textContent;
         try {
-          const response = await fetch('/api/data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'prediction', user_name: user.username, prediction: selectedPrediction.textContent }),
-          });
-          if (!response.ok) throw new Error('Failed to save prediction');
+          // Check if prediction already exists
+          const { data: existingPrediction, error: selectError } = await supabase
+            .from('predictions')
+            .select('id')
+            .eq('user_name', user.username)
+            .single();
+
+          if (selectError && selectError.code !== 'PGRST116') {
+            throw selectError;
+          }
+          
+          let response;
+          if (existingPrediction) {
+            // Update the existing prediction
+            response = await supabase
+              .from('predictions')
+              .update({ prediction: prediction })
+              .eq('id', existingPrediction.id);
+          } else {
+            // Insert a new prediction
+            response = await supabase
+              .from('predictions')
+              .insert([{ user_name: user.username, prediction: prediction }]);
+          }
+
+          if (response.error) {
+            throw response.error;
+          }
 
           alert("Prediction submitted! Thanks for participating! 🎉");
           window.location.reload();
@@ -263,9 +297,14 @@ function renderContestantsPage() {
 
 async function fetchLeaderboardData() {
   try {
-    const response = await fetch('/api/data?type=leaderboard');
-    if (!response.ok) throw new Error('Failed to fetch leaderboard');
-    const data = await response.json();
+    const { data, error } = await supabase
+      .from('leaderboard')
+      .select('*')
+      .order('score', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
     return data;
   } catch (error) {
     console.error("Leaderboard fetch error:", error);
@@ -319,13 +358,29 @@ async function renderLeaderboard() {
 
 async function updatePlayerScore(name, points) {
   try {
-    const response = await fetch('/api/data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'leaderboard', name, score: points }),
-    });
-    if (!response.ok) throw new Error('Failed to update score');
-    console.log('Score updated successfully!');
+    // Check if player exists
+    const { data: existingPlayer, error: selectError } = await supabase
+      .from('leaderboard')
+      .select('id, score')
+      .eq('name', name)
+      .single();
+
+    if (selectError && selectError.code !== 'PGRST116') {
+      throw selectError;
+    }
+
+    if (existingPlayer) {
+      // Update existing player's score
+      await supabase
+        .from('leaderboard')
+        .update({ score: existingPlayer.score + points })
+        .eq('id', existingPlayer.id);
+    } else {
+      // Insert new player
+      await supabase
+        .from('leaderboard')
+        .insert([{ name: name, score: points }]);
+    }
   } catch (error) {
     console.error("Score update error:", error);
   }
@@ -333,9 +388,13 @@ async function updatePlayerScore(name, points) {
 
 async function updateAllScores(eliminatedContestant) {
   try {
-    const predictionsResponse = await fetch('/api/data?type=predictions');
-    if (!predictionsResponse.ok) throw new Error('Failed to fetch predictions');
-    const predictions = await predictionsResponse.json();
+    const { data: predictions, error } = await supabase
+      .from('predictions')
+      .select('*');
+
+    if (error) {
+      throw error;
+    }
 
     const correctPredictors = predictions.filter(p => p.prediction === eliminatedContestant);
 
@@ -522,12 +581,10 @@ async function renderAdminPanel() {
   deletePredictionsBtn?.addEventListener("click", async () => {
     if (confirm("Are you sure you want to delete all user predictions? This cannot be undone.")) {
       try {
-        const response = await fetch('/api/data', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'predictions' })
-        });
-        if (!response.ok) throw new Error('Failed to delete predictions');
+        const { error } = await supabase.from('predictions').delete().neq('id', 0); // Deletes all rows
+        if (error) {
+          throw error;
+        }
         alert("🗑️ User predictions have been deleted!");
         window.location.reload();
       } catch (error) {
