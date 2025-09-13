@@ -45,17 +45,17 @@ nav a:hover {
   padding: 2rem;
 }
 
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 2rem;
+/* Contestants page grid */
+#contestants-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 2rem;
 }
 
 /* Prediction page specific styles */
 #prediction-options {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
 }
@@ -66,28 +66,6 @@ nav a:hover {
 
 #submitPrediction {
   margin-top: 2rem;
-}
-
-/* New responsive styles */
-@media (min-width: 640px) {
-  .grid-container {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-}
-
-@media (min-width: 768px) {
-  nav {
-    justify-content: space-between;
-  }
-  .grid-container {
-    gap: 3rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid-container {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  }
 }
 
 /* New styles for the "closed" message */

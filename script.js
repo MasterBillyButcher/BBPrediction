@@ -167,7 +167,7 @@ async function renderPredictionPage() {
     const predictionPageContent = document.createElement('div');
     predictionPageContent.innerHTML = `
       <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-4 text-center">Predict the Winner! 🎯</h1>
-      <p id="prediction-text" class="text-lg text-gray-400 text-center mb-8">Who will be eliminated? 🤔</p>
+      <p id="prediction-text" class="text-lg text-gray-400 text-center mb-8">Select a contestant from the nominated list below who you think will win this week!</p>
       <div id="prediction-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
       <div class="text-center mt-8">
         <button id="submitPrediction" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">Submit Prediction</button>
@@ -231,12 +231,8 @@ async function renderPredictionPage() {
 }
 
 function renderContestantsPage() {
-  const mainContent = document.getElementById("main-content");
-  mainContent.innerHTML = `
-    <h1 class="text-4xl md:text-5xl font-extrabold text-green-400 mb-8 mt-4 text-center">👑 Bigg Boss 19 Contestants</h1>
-    <div id="contestants-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
-  `;
   const contestantsList = document.getElementById("contestants-list");
+  if (!contestantsList) return;
   contestantData.forEach(contestant => {
     const instagramURL = `https://www.instagram.com/${contestant.instagram}`;
     const card = document.createElement("div");
