@@ -65,18 +65,9 @@ async function handleAdminNav() {
 
 function handleLogout() {
   const logoutBtn = document.getElementById('logoutBtn');
-  const logoutBtnMobile = document.getElementById('logoutBtnMobile');
   
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('twitch_token');
-      localStorage.removeItem('twitch_username');
-      window.location.href = '/';
-    });
-  }
-  
-  if (logoutBtnMobile) {
-    logoutBtnMobile.addEventListener('click', () => {
       localStorage.removeItem('twitch_token');
       localStorage.removeItem('twitch_username');
       window.location.href = '/';
@@ -117,10 +108,11 @@ async function renderHomePage() {
 
     mainContent.innerHTML = `
       <div class="w-full max-w-4xl p-8 md:p-12 lg:p-16 bg-gray-800 rounded-2xl shadow-2xl border-2 border-green-500 text-center animate-fade-in">
-        <div class="flex flex-col items-center justify-center sm:flex-row sm:justify-center sm:items-center space-y-4 sm:space-y-0 sm:space-x-8 mb-6">
-          <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors hidden sm:block">Logout</button>
-          <img src="${user.profileImageUrl}" alt="User PFP" class="rounded-full w-32 h-32 md:w-40 md:h-40 border-4 border-green-400 shadow-lg">
-          <button id="logoutBtnMobile" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors block sm:hidden">Logout</button>
+        <div class="flex flex-col items-center mb-6">
+          <div class="relative w-40 h-40 md:w-48 md:h-48">
+            <img src="${user.profileImageUrl}" alt="User PFP" class="rounded-full w-full h-full border-4 border-green-400 shadow-lg">
+            <button id="logoutBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">Logout</button>
+          </div>
         </div>
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight">Welcome, <strong class="text-green-400">${user.username}</strong>! 🎉</h1>
         <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
@@ -346,7 +338,7 @@ async function updateAllScores(eliminatedContestant) {
     if (!predictionsResponse.ok) throw new Error('Failed to fetch predictions');
     const predictions = await predictionsResponse.json();
 
-    const correctPredictors = predictions.filter(p => p.prediction === eliminatedContated);
+    const correctPredictors = predictions.filter(p => p.prediction === eliminatedContestant);
 
     if (correctPredictors.length > 0) {
       alert(`🎉 ${correctPredictors.length} player(s) predicted correctly! Updating scores...`);
